@@ -1454,6 +1454,8 @@ document.getElementById('export-inst-xlsx').addEventListener('click',function(){
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(iData),'강사DB');
   XLSX.writeFile(wb,'강사DB.xlsx');
 });
+
+document.getElementById('export-csv').addEventListener('click',function(){
   var rows=[['ID','대분류','연령','핵심고통','주제슬로건','기간','수치결과','감정결과','시급성','지불의사','기존지출','경쟁포화','점수','우선순위']];
   targets.forEach(function(t){rows.push([t.id,t.cat,t.age,t.pain,t.slogan,t.period,t.resultNum,t.resultEmo,t.urgency,t.spend,t.existing,t.competition,calcScore(t),t.prio]);});
   var csv=rows.map(function(r){return r.map(function(c){return'"'+(c||'').toString().replace(/"/g,'""')+'"';}).join(',');}).join('\n');
