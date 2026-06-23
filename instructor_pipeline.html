@@ -5,173 +5,267 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>강사 섭외 파이프라인</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+:root{
+  --bg:        #191919;
+  --bg-1:      #1f1f1f;
+  --bg-2:      #252525;
+  --bg-3:      #2c2c2c;
+  --border:    rgba(255,255,255,.07);
+  --border-2:  rgba(255,255,255,.13);
+  --text-1:    #ececec;
+  --text-2:    #9b9b9b;
+  --text-3:    #555555;
+  --accent:    #5e6ad2;
+  --accent-2:  #7b87e0;
+  --green:     #4cb97a;
+  --yellow:    #e8a931;
+  --red:       #e05252;
+  --blue:      #4e94d6;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Nanum Myeongjo',Georgia,serif;background:#f7f5f0;color:#1c1917;font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased}
-.app{max-width:1400px;margin:0 auto;padding:36px 24px}
-.header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;padding-bottom:22px;border-bottom:2px solid #1c1917}
-.header-left h1{font-size:24px;font-weight:800;color:#1c1917;letter-spacing:-.3px;margin-bottom:5px}
-.header-left p{font-size:13px;color:#a8a29e;font-weight:400}
-.header-actions{display:flex;gap:8px;align-items:center}
-.export-btn{padding:6px 14px;border:1px solid #d6d3cd;border-radius:6px;background:#fff;color:#57534e;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nanum Myeongjo',serif;transition:all .12s}
-.export-btn:hover{border-color:#1c1917;color:#1c1917}
-.save-indicator{font-size:11px;color:#a8a29e;display:flex;align-items:center;gap:4px}
-.save-dot{width:6px;height:6px;border-radius:50%;background:#22c55e}
-.tabs{display:flex;gap:0;border-bottom:1px solid #d6d3cd;margin-bottom:24px;width:fit-content}
-.tab{padding:8px 22px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:none;color:#a8a29e;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;font-family:'Nanum Myeongjo',serif}
-.tab.active{color:#1c1917;border-bottom:2px solid #1c1917}
-.tab:hover:not(.active){color:#57534e}
-.panel{display:none}.panel.active{display:block}
-.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
-.left-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.search-wrap{position:relative;display:flex;align-items:center}
-.search-wrap svg{position:absolute;left:10px;color:#c4bfb8;width:14px;height:14px;pointer-events:none}
-.search-input{border:1px solid #d6d3cd;border-radius:6px;padding:7px 10px 7px 30px;font-size:13px;background:#fff;color:#1c1917;outline:none;width:190px;font-family:'Nanum Myeongjo',serif;transition:border .15s}
-.search-input:focus{border-color:#1c1917}
-.filter-pills{display:flex;gap:4px;flex-wrap:wrap}
-.pill{padding:5px 14px;border:1px solid #d6d3cd;border-radius:4px;background:#fff;font-size:12px;font-weight:700;cursor:pointer;color:#78716c;font-family:'Nanum Myeongjo',serif;transition:all .12s}
-.pill:hover{border-color:#1c1917;color:#1c1917}
-.pill.on{background:#1c1917;color:#f7f5f0;border-color:#1c1917}
-.add-btn{padding:7px 16px;border:1px solid #1c1917;border-radius:6px;background:#fff;color:#1c1917;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Nanum Myeongjo',serif;transition:all .12s}
-.add-btn:hover{background:#1c1917;color:#f7f5f0}
-.hint{font-size:12px;color:#c4bfb8;margin-bottom:10px}
-.table-wrap{overflow-x:auto;border:1px solid #d6d3cd;border-radius:8px;background:#fff}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{padding:11px 13px;text-align:left;font-weight:700;font-size:11.5px;color:#78716c;background:#faf8f5;border-bottom:1px solid #e8e4de;white-space:nowrap;letter-spacing:.3px;font-family:'Nanum Myeongjo',serif}
-td{padding:0;border-bottom:1px solid #f0ece6;vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:#fdf9f5}
-.cell{padding:10px 13px;min-height:40px;display:flex;align-items:center;cursor:pointer;min-width:50px;user-select:none;transition:background .1s}
-.cell:hover{background:#fef3e2}
-.cell.no-edit{cursor:default}.cell.no-edit:hover{background:transparent}
-.cell-text{font-size:13px;color:#1c1917;line-height:1.55}
-.cell-muted{font-size:12.5px;color:#a8a29e;line-height:1.55}
-.cell-small{font-size:12.5px;color:#57534e;line-height:1.55}
-.cell-strong{font-size:13px;color:#1c1917;font-weight:700}
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:4px;font-size:11.5px;font-weight:700;white-space:nowrap;font-family:'Nanum Myeongjo',serif}
-.cat-m{background:#eff6ff;color:#1d4ed8}.cat-f{background:#fdf2f8;color:#9d174d}
-.cat-w{background:#fefce8;color:#a16207}.cat-s{background:#f5f3ff;color:#6d28d9}.cat-c{background:#f0fdf4;color:#15803d}
-.prio-1{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
-.prio-2{background:#fefce8;color:#a16207;border:1px solid #fef08a}
-.prio-3{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
-.prio-4{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
-.prio-5{background:#fafaf9;color:#78716c;border:1px solid #e7e5e4}
-.urg-vh,.sp-vh{background:#fff1f2;color:#be123c}
-.urg-h,.sp-h{background:#fefce8;color:#a16207}
-.urg-m,.sp-m{background:#eff6ff;color:#1d4ed8}
-.urg-l,.sp-l{background:#fafaf9;color:#78716c}
-.comp-low{background:#f0fdf4;color:#15803d}.comp-mid{background:#fefce8;color:#a16207}.comp-high{background:#fff1f2;color:#be123c}
-.ist-0{background:#fafaf9;color:#78716c}.ist-1{background:#fefce8;color:#a16207}
-.ist-2{background:#eff6ff;color:#1d4ed8}.ist-3{background:#f0fdf4;color:#15803d}.ist-4{background:#fff1f2;color:#be123c}
-.exist-y{color:#15803d;font-weight:800;font-size:14px}.exist-n{color:#d6d3cd;font-size:14px}
-.topic-chip{background:#fefce8;color:#a16207;padding:3px 10px;border-radius:4px;font-size:12px;font-weight:700;border:1px solid #fef08a}
-.score-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:4px;font-size:12px;font-weight:700;font-family:'Nanum Myeongjo',serif}
-.score-s{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
-.score-a{background:#fefce8;color:#a16207;border:1px solid #fef08a}
-.score-b{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
-.score-c{background:#fafaf9;color:#78716c;border:1px solid #e7e5e4}
-.star-on{color:#d97706;cursor:pointer;font-size:15px;line-height:1}
-.star-off{color:#e7e5e4;cursor:pointer;font-size:15px;line-height:1}
-.del-btn{padding:4px 8px;border:1px solid #e7e5e4;border-radius:4px;background:none;font-size:11px;cursor:pointer;color:#d6d3cd;margin:0 8px;transition:all .12s}
-.del-btn:hover{background:#fff1f2;color:#be123c;border-color:#fecdd3}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text-1);font-size:13.5px;line-height:1.6;-webkit-font-smoothing:antialiased;letter-spacing:-.1px}
 
-/* popup */
-#edit-popup{display:none;position:fixed;z-index:9999;background:#fff;border:1px solid #d6d3cd;border-radius:10px;box-shadow:0 16px 48px rgba(28,25,23,.14);padding:20px 22px;min-width:290px;max-width:370px}
+/* ── layout ── */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* ── sidebar ── */
+.sidebar{width:220px;flex-shrink:0;background:var(--bg-1);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0}
+.sidebar-logo{padding:0 18px 20px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.sidebar-logo h1{font-size:13px;font-weight:600;color:var(--text-1);letter-spacing:-.2px}
+.sidebar-logo p{font-size:11px;color:var(--text-3);margin-top:2px}
+.sidebar-section{padding:0 10px;margin-bottom:4px}
+.sidebar-label{font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:.8px;text-transform:uppercase;padding:8px 8px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-2);transition:all .12s;user-select:none;border:none;background:none;width:100%;text-align:left;font-family:'Pretendard',sans-serif}
+.nav-item:hover{background:var(--bg-3);color:var(--text-1)}
+.nav-item.active{background:var(--bg-3);color:var(--text-1)}
+.nav-item .nav-icon{width:16px;height:16px;opacity:.5;flex-shrink:0}
+.nav-item.active .nav-icon{opacity:1}
+.nav-count{margin-left:auto;font-size:11px;color:var(--text-3);background:var(--bg-2);border:1px solid var(--border);border-radius:4px;padding:0 6px;line-height:18px}
+.sidebar-bottom{margin-top:auto;padding:12px 10px 0;border-top:1px solid var(--border)}
+.save-indicator{display:flex;align-items:center;gap:6px;padding:7px 8px;font-size:11.5px;color:var(--text-3)}
+.save-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 6px #3dd68c66}
+
+/* ── main ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:48px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;background:var(--bg)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-title{font-size:13.5px;font-weight:600;color:var(--text-1)}
+.topbar-sub{font-size:12px;color:var(--text-3)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb-btn{padding:5px 12px;border:1px solid var(--border-2);border-radius:6px;background:transparent;color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:'Pretendard',sans-serif;transition:all .12s;white-space:nowrap}
+.tb-btn:hover{background:var(--bg-3);color:var(--text-1);border-color:var(--border-2)}
+.tb-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tb-btn.primary:hover{background:var(--accent-2);border-color:var(--accent-2)}
+
+/* ── content ── */
+.content{flex:1;overflow-y:auto;padding:0}
+.panel{display:none}.panel.active{display:block}
+
+/* ── filter bar ── */
+.filterbar{display:flex;align-items:center;gap:8px;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--bg)}
+.search-wrap{position:relative;display:flex;align-items:center}
+.search-wrap svg{position:absolute;left:9px;color:var(--text-3);width:13px;height:13px;pointer-events:none}
+.search-input{border:1px solid var(--border);border-radius:6px;padding:6px 9px 6px 28px;font-size:12.5px;background:var(--bg-2);color:var(--text-1);outline:none;width:180px;font-family:'Pretendard',sans-serif;transition:border .15s}
+.search-input:focus{border-color:var(--border-2)}
+.search-input::placeholder{color:var(--text-3)}
+.filter-pills{display:flex;gap:3px}
+.pill{padding:4px 12px;border:1px solid transparent;border-radius:5px;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:var(--text-3);font-family:'Pretendard',sans-serif;transition:all .1s}
+.pill:hover{color:var(--text-2);background:var(--bg-3)}
+.pill.on{background:var(--bg-3);color:var(--text-1);border-color:var(--border-2)}
+.filter-sep{width:1px;height:18px;background:var(--border);flex-shrink:0}
+.hint{display:none}
+
+/* ── table ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{padding:9px 16px;text-align:left;font-weight:500;font-size:11px;color:var(--text-3);border-bottom:1px solid var(--border);white-space:nowrap;letter-spacing:.3px;text-transform:uppercase;background:var(--bg)}
+td{padding:0;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.018)}
+.cell{padding:11px 16px;min-height:42px;display:flex;align-items:center;cursor:pointer;min-width:40px;user-select:none}
+.cell:hover{background:rgba(255,255,255,.025)}
+.cell.no-edit{cursor:default}.cell.no-edit:hover{background:transparent}
+.cell-text{font-size:12.5px;color:var(--text-1);line-height:1.5}
+.cell-muted{font-size:12px;color:var(--text-3)}
+.cell-small{font-size:12px;color:var(--text-2);line-height:1.5}
+.cell-strong{font-size:12.5px;color:var(--text-1);font-weight:500}
+
+/* ── status dot badges ── */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:500;white-space:nowrap}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.cat-m{background:rgba(92,156,245,.12);color:var(--blue)}.cat-m::before{background:var(--blue)}
+.cat-f{background:rgba(242,92,163,.12);color:#f25ca3}.cat-f::before{background:#f25ca3}
+.cat-w{background:rgba(245,197,66,.12);color:var(--yellow)}.cat-w::before{background:var(--yellow)}
+.cat-s{background:rgba(124,92,252,.12);color:var(--accent-2)}.cat-s::before{background:var(--accent-2)}
+.cat-c{background:rgba(61,214,140,.12);color:var(--green)}.cat-c::before{background:var(--green)}
+.prio-1{background:rgba(242,92,92,.1);color:var(--red)}.prio-1::before{background:var(--red)}
+.prio-2{background:rgba(245,197,66,.1);color:var(--yellow)}.prio-2::before{background:var(--yellow)}
+.prio-3{background:rgba(61,214,140,.1);color:var(--green)}.prio-3::before{background:var(--green)}
+.prio-4{background:rgba(92,156,245,.1);color:var(--blue)}.prio-4::before{background:var(--blue)}
+.prio-5{background:rgba(255,255,255,.05);color:var(--text-3)}.prio-5::before{background:var(--text-3)}
+.urg-vh,.sp-vh{background:rgba(242,92,92,.1);color:var(--red)}
+.urg-h,.sp-h{background:rgba(245,197,66,.1);color:var(--yellow)}
+.urg-m,.sp-m{background:rgba(92,156,245,.1);color:var(--blue)}
+.urg-l,.sp-l{background:rgba(255,255,255,.05);color:var(--text-3)}
+.comp-low{background:rgba(61,214,140,.1);color:var(--green)}
+.comp-mid{background:rgba(245,197,66,.1);color:var(--yellow)}
+.comp-high{background:rgba(242,92,92,.1);color:var(--red)}
+.ist-0{background:rgba(255,255,255,.05);color:var(--text-3)}
+.ist-1{background:rgba(245,197,66,.1);color:var(--yellow)}
+.ist-2{background:rgba(92,156,245,.1);color:var(--blue)}
+.ist-3{background:rgba(61,214,140,.1);color:var(--green)}
+.ist-4{background:rgba(242,92,92,.1);color:var(--red)}
+.exist-y{color:var(--green);font-weight:600;font-size:13px}
+.exist-n{color:var(--text-3);font-size:13px}
+.topic-chip{background:rgba(124,92,252,.15);color:var(--accent-2);padding:2px 9px;border-radius:4px;font-size:11.5px;font-weight:500}
+.score-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:600}
+.score-s{background:rgba(242,92,92,.12);color:var(--red)}
+.score-a{background:rgba(245,197,66,.12);color:var(--yellow)}
+.score-b{background:rgba(61,214,140,.12);color:var(--green)}
+.score-c{background:rgba(255,255,255,.05);color:var(--text-3)}
+.star-on{color:var(--yellow);cursor:pointer;font-size:14px;line-height:1}
+.star-off{color:var(--text-3);cursor:pointer;font-size:14px;line-height:1}
+.del-btn{padding:3px 7px;border:1px solid transparent;border-radius:4px;background:none;font-size:11px;cursor:pointer;color:var(--text-3);margin:0 8px;transition:all .1s;opacity:0}
+tr:hover .del-btn{opacity:1}
+.del-btn:hover{background:rgba(242,92,92,.12);color:var(--red);border-color:rgba(242,92,92,.2)}
+
+/* ── popup ── */
+#edit-popup{display:none;position:fixed;z-index:9999;background:var(--bg-2);border:1px solid var(--border-2);border-radius:10px;box-shadow:0 0 0 1px rgba(255,255,255,.04),0 24px 64px rgba(0,0,0,.9);padding:18px 20px;min-width:280px;max-width:360px}
 #edit-popup.open{display:block}
-#edit-popup .pop-label{font-size:11px;color:#a8a29e;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;font-family:'Nanum Myeongjo',serif}
-#edit-popup input[type=text],#edit-popup input[type=date],#edit-popup textarea,#edit-popup select{width:100%;border:1px solid #d6d3cd;border-radius:6px;padding:9px 12px;font-size:13.5px;font-family:'Nanum Myeongjo',serif;background:#fff;color:#1c1917;outline:none;transition:border .15s;line-height:1.6}
-#edit-popup input:focus,#edit-popup textarea:focus,#edit-popup select:focus{border-color:#1c1917;box-shadow:0 0 0 3px rgba(28,25,23,.07)}
-#edit-popup textarea{resize:vertical;min-height:84px;line-height:1.7}
-#edit-popup .pop-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
-#edit-popup .pop-cancel{padding:7px 14px;border:1px solid #d6d3cd;border-radius:6px;background:none;font-size:13px;cursor:pointer;color:#78716c;font-family:'Nanum Myeongjo',serif;font-weight:700}
-#edit-popup .pop-cancel:hover{background:#f7f5f0}
-#edit-popup .pop-save{padding:7px 20px;border:none;border-radius:6px;background:#1c1917;color:#f7f5f0;font-size:13px;cursor:pointer;font-weight:700;font-family:'Nanum Myeongjo',serif}
-#edit-popup .pop-save:hover{background:#44403c}
+#edit-popup .pop-label{font-size:10px;color:var(--text-3);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
+#edit-popup input[type=text],#edit-popup input[type=date],#edit-popup textarea,#edit-popup select{width:100%;border:1px solid var(--border-2);border-radius:6px;padding:8px 11px;font-size:13px;font-family:'Pretendard',sans-serif;background:var(--bg-1);color:var(--text-1);outline:none;transition:border .15s}
+#edit-popup input:focus,#edit-popup textarea:focus,#edit-popup select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(124,92,252,.15)}
+#edit-popup option{background:var(--bg-2)}
+#edit-popup textarea{resize:vertical;min-height:80px;line-height:1.6}
+#edit-popup .pop-footer{display:flex;justify-content:flex-end;gap:6px;margin-top:14px}
+#edit-popup .pop-cancel{padding:6px 13px;border:1px solid var(--border-2);border-radius:6px;background:none;font-size:12.5px;cursor:pointer;color:var(--text-2);font-family:'Pretendard',sans-serif;font-weight:500}
+#edit-popup .pop-cancel:hover{background:var(--bg-3)}
+#edit-popup .pop-save{padding:6px 16px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-size:12.5px;cursor:pointer;font-weight:600;font-family:'Pretendard',sans-serif}
+#edit-popup .pop-save:hover{background:var(--accent-2)}
 #pop-backdrop{display:none;position:fixed;inset:0;z-index:9998}
 #pop-backdrop.open{display:block}
 
-/* kanban */
-.kanban-wrap{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:4px 0}
-.kboard{background:#faf8f5;border:1px solid #e8e4de;border-radius:8px;padding:12px;min-height:200px}
-.kboard-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #e8e4de}
-.kboard-title{font-size:12px;font-weight:700;color:#78716c;letter-spacing:.3px;font-family:'Nanum Myeongjo',serif}
-.kboard-count{font-size:11px;font-weight:700;color:#a8a29e;background:#fff;border:1px solid #e8e4de;border-radius:10px;padding:1px 8px}
-.kcard{background:#fff;border:1px solid #e8e4de;border-radius:6px;padding:10px 12px;margin-bottom:8px;cursor:grab;transition:all .15s;user-select:none}
-.kcard:hover{border-color:#d6d3cd;background:#fdf9f5}
-.kcard.dragging{opacity:.4;cursor:grabbing}
-.kcard-name{font-size:13px;font-weight:700;color:#1c1917;margin-bottom:4px}
-.kcard-sub{font-size:11.5px;color:#a8a29e;line-height:1.4}
-.kcard-stars{font-size:13px;color:#d97706;margin-top:5px}
-.kboard.drag-over{background:#fef3e2;border-color:#d97706}
+/* ── kanban ── */
+.kanban-wrap{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:20px 24px}
+.kboard{background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px;min-height:300px}
+.kboard-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.kboard-title{font-size:11px;font-weight:600;color:var(--text-3);letter-spacing:.6px;text-transform:uppercase}
+.kboard-count{font-size:11px;font-weight:500;color:var(--text-3);background:var(--bg-3);border-radius:4px;padding:1px 7px}
+.kcard{background:var(--bg-2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:6px;cursor:grab;transition:all .15s;user-select:none}
+.kcard:hover{border-color:var(--border-2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.kcard.dragging{opacity:.3;cursor:grabbing}
+.kcard-name{font-size:12.5px;font-weight:500;color:var(--text-1);margin-bottom:4px}
+.kcard-sub{font-size:11.5px;color:var(--text-3);line-height:1.4}
+.kcard-stars{font-size:12px;color:var(--yellow);margin-top:6px;letter-spacing:1px}
+.kboard.drag-over{border-color:var(--accent);background:rgba(124,92,252,.04)}
 
-/* drilldown modal */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(28,25,23,.45);z-index:8000;align-items:center;justify-content:center}
+/* ── drilldown modal ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:8000;align-items:center;justify-content:center}
 .modal-bg.open{display:flex}
-.modal-box{background:#fff;border-radius:12px;border:1px solid #d6d3cd;padding:28px 32px;width:560px;max-width:94vw;max-height:80vh;overflow-y:auto}
-.modal-box h3{font-size:17px;font-weight:800;margin-bottom:6px;color:#1c1917}
-.modal-box .modal-sub{font-size:13px;color:#a8a29e;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f0ece6}
-.modal-inst-card{border:1px solid #e8e4de;border-radius:8px;padding:14px 16px;margin-bottom:10px;background:#faf8f5}
-.modal-inst-name{font-size:14px;font-weight:700;color:#1c1917;margin-bottom:4px}
-.modal-inst-meta{font-size:12.5px;color:#78716c;line-height:1.6}
-.modal-close{float:right;border:none;background:none;font-size:18px;cursor:pointer;color:#a8a29e;margin-top:-4px}
-.modal-empty{color:#c4bfb8;font-size:13px;padding:16px 0}
+.modal-box{background:var(--bg-2);border-radius:12px;border:1px solid var(--border-2);box-shadow:0 0 0 1px rgba(255,255,255,.04),0 32px 80px rgba(0,0,0,.9);padding:28px 32px;width:560px;max-width:94vw;max-height:80vh;overflow-y:auto}
+.modal-box h3{font-size:16px;font-weight:600;margin-bottom:5px;color:var(--text-1)}
+.modal-box .modal-sub{font-size:12.5px;color:var(--text-3);margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.modal-inst-card{border:1px solid var(--border);border-radius:7px;padding:13px 15px;margin-bottom:8px;background:var(--bg-1)}
+.modal-inst-name{font-size:13.5px;font-weight:600;color:var(--text-1);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.modal-inst-meta{font-size:12px;color:var(--text-3);line-height:1.6}
+.modal-close{float:right;border:none;background:none;font-size:16px;cursor:pointer;color:var(--text-3);transition:color .1s}
+.modal-close:hover{color:var(--text-1)}
+.modal-empty{color:var(--text-3);font-size:13px;padding:16px 0}
 
-/* dashboard */
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
-.stat-card{background:#fff;border:1px solid #d6d3cd;border-radius:8px;padding:18px 20px}
-.stat-label{font-size:11px;color:#a8a29e;margin-bottom:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
-.stat-val{font-size:28px;font-weight:800;color:#1c1917;letter-spacing:-.5px}
-.stat-sub{font-size:11px;color:#a8a29e;margin-top:2px}
-.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.dash-card{background:#fff;border:1px solid #d6d3cd;border-radius:8px;padding:20px}
-.dash-card h4{font-size:11px;font-weight:700;color:#a8a29e;margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #f0ece6;padding-bottom:10px}
-.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.bar-label{width:72px;font-size:12.5px;color:#78716c;text-align:right;flex-shrink:0}
-.bar-track{flex:1;background:#f0ece6;border-radius:4px;height:8px;overflow:hidden}
-.bar-fill{height:100%;border-radius:4px;transition:width .4s ease}
-.bar-val{width:28px;font-size:12.5px;font-weight:700;text-align:right;flex-shrink:0;color:#1c1917}
-.dash-item{padding:9px 0;border-bottom:1px solid #f0ece6;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+/* ── dashboard ── */
+.dash-wrap{padding:20px 24px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px}
+.stat-card{background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
+.stat-label{font-size:10.5px;color:var(--text-3);margin-bottom:8px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.stat-val{font-size:26px;font-weight:700;color:var(--text-1);letter-spacing:-.5px;line-height:1}
+.stat-sub{font-size:11px;color:var(--text-3);margin-top:4px}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dash-card{background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:18px 20px}
+.dash-card h4{font-size:10.5px;font-weight:600;color:var(--text-3);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.bar-label{width:68px;font-size:11.5px;color:var(--text-3);text-align:right;flex-shrink:0}
+.bar-track{flex:1;background:var(--bg-3);border-radius:3px;height:5px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.bar-val{width:24px;font-size:11.5px;font-weight:600;text-align:right;flex-shrink:0;color:var(--text-2)}
+.dash-item{padding:9px 0;border-bottom:1px solid var(--border);font-size:12.5px;display:flex;justify-content:space-between;align-items:center;color:var(--text-2)}
 .dash-item:last-child{border-bottom:none}
-.dash-empty{color:#c4bfb8;font-size:13px;padding:8px 0}
+.dash-empty{color:var(--text-3);font-size:12.5px;padding:8px 0}
 .funnel-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.funnel-label{width:80px;font-size:12px;color:#78716c;text-align:right;flex-shrink:0}
-.funnel-bar{flex:1;background:#f0ece6;border-radius:4px;height:20px;overflow:hidden;position:relative}
-.funnel-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:11px;font-weight:700;color:#fff;transition:width .4s}
-.funnel-pct{width:40px;font-size:11.5px;color:#a8a29e;text-align:right;flex-shrink:0}
-.empty-msg{text-align:center;padding:44px;color:#c4bfb8;font-size:13px}
+.funnel-label{width:76px;font-size:11.5px;color:var(--text-3);text-align:right;flex-shrink:0}
+.funnel-bar{flex:1;background:var(--bg-3);border-radius:4px;height:18px;overflow:hidden}
+.funnel-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;font-size:10.5px;font-weight:700;color:rgba(255,255,255,.8);transition:width .5s}
+.funnel-pct{width:36px;font-size:11px;color:var(--text-3);text-align:right;flex-shrink:0}
+.empty-msg{text-align:center;padding:48px;color:var(--text-3);font-size:13px}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header">
-    <div class="header-left">
-      <h1>강사 섭외 파이프라인</h1>
-      <p>타겟 → 문제 → 결과 → 강사 매칭 순서로 관리 · 셀 클릭으로 즉시 수정</p>
+
+  <!-- ── SIDEBAR ── -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h1>강사 섭외</h1>
+      <p>파이프라인 v2</p>
     </div>
-    <div class="header-actions">
-      <div class="save-indicator"><div class="save-dot"></div><span id="save-label">저장됨</span></div>
-      <button class="export-btn" id="export-csv">CSV 내보내기</button>
-      <button class="export-btn" id="export-xlsx">엑셀 내보내기</button>
+    <div class="sidebar-section">
+      <div class="sidebar-label">워크스페이스</div>
+      <button class="nav-item active" data-tab="targets">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+        타겟 × 주제
+        <span class="nav-count" id="nav-count-targets">0</span>
+      </button>
+      <button class="nav-item" data-tab="instructors">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+        강사 DB
+        <span class="nav-count" id="nav-count-inst">0</span>
+      </button>
+      <button class="nav-item" data-tab="kanban">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="4" height="10" rx="1"/><rect x="6" y="3" width="4" height="7" rx="1"/><rect x="11" y="3" width="4" height="12" rx="1"/></svg>
+        칸반 보드
+      </button>
+      <button class="nav-item" data-tab="meetings">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4z"/><path d="M2 4l6 5 6-5"/></svg>
+        미팅 로그
+        <span class="nav-count" id="nav-count-meet">0</span>
+      </button>
+      <button class="nav-item" data-tab="dashboard">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10l4-4 3 3 5-5"/></svg>
+        대시보드
+      </button>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="save-indicator">
+        <div class="save-dot"></div>
+        <span id="save-label">저장됨</span>
+      </div>
     </div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" data-tab="targets">타겟 × 주제</button>
-    <button class="tab" data-tab="instructors">강사 DB</button>
-    <button class="tab" data-tab="kanban">칸반 보드</button>
-    <button class="tab" data-tab="meetings">미팅 로그</button>
-    <button class="tab" data-tab="dashboard">대시보드</button>
-  </div>
+  <!-- ── MAIN ── -->
+  <div class="main">
 
-  <!-- TARGETS -->
-  <div id="panel-targets" class="panel active">
-    <div class="toolbar">
-      <div class="left-tools">
+    <!-- TARGETS -->
+    <div id="panel-targets" class="panel active">
+      <div class="topbar">
+        <div class="topbar-left">
+          <span class="topbar-title">타겟 × 주제</span>
+          <span class="topbar-sub">고객 문제 중심 기획</span>
+        </div>
+        <div class="topbar-right">
+          <button class="tb-btn" id="export-csv">CSV</button>
+          <button class="tb-btn" id="export-xlsx">엑셀</button>
+          <button class="tb-btn primary" id="add-target">+ 타겟 추가</button>
+        </div>
+      </div>
+      <div class="filterbar">
         <div class="search-wrap">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="6"/><path d="M15 15l-3.5-3.5"/></svg>
           <input class="search-input" type="text" id="target-search" placeholder="검색...">
         </div>
+        <div class="filter-sep"></div>
         <div class="filter-pills" data-filter="cat">
           <button class="pill on" data-val="all">전체</button>
           <button class="pill" data-val="남성">남성</button>
@@ -179,49 +273,58 @@ tr:hover td{background:#fdf9f5}
           <button class="pill" data-val="직장인">직장인</button>
           <button class="pill" data-val="시니어">시니어</button>
         </div>
+        <div class="filter-sep"></div>
         <div class="filter-pills" data-filter="prio">
-          <button class="pill on" data-val="all">전 순위</button>
+          <button class="pill on" data-val="all">전체</button>
           <button class="pill" data-val="1">1순위</button>
           <button class="pill" data-val="2">2순위</button>
           <button class="pill" data-val="3+">3+</button>
         </div>
       </div>
-      <button class="add-btn" id="add-target">+ 타겟 추가</button>
+      <div class="content">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th style="width:28px">#</th>
+              <th style="width:70px">대분류</th>
+              <th style="width:76px">연령</th>
+              <th style="width:148px">핵심 고통</th>
+              <th style="width:168px">주제 슬로건</th>
+              <th style="width:58px">기간</th>
+              <th style="width:86px">수치 결과</th>
+              <th style="width:130px">감정 결과</th>
+              <th style="width:80px">시급성</th>
+              <th style="width:80px">지불의사</th>
+              <th style="width:56px">기존지출</th>
+              <th style="width:80px">경쟁포화</th>
+              <th style="width:64px">자동점수</th>
+              <th style="width:62px">우선순위</th>
+              <th style="width:52px">강사</th>
+              <th style="width:36px"></th>
+            </tr></thead>
+            <tbody id="target-body"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <p class="hint">✦ 셀 클릭 → 팝업 편집 · 점수 열은 시급성+지불의사+기존지출+경쟁포화 자동 계산 · 강사 수 클릭 → 연결 강사 보기</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th style="width:28px">#</th>
-          <th style="width:70px">대분류</th>
-          <th style="width:76px">연령</th>
-          <th style="width:148px">핵심 고통</th>
-          <th style="width:168px">주제 슬로건</th>
-          <th style="width:58px">기간</th>
-          <th style="width:86px">수치 결과</th>
-          <th style="width:130px">감정 결과</th>
-          <th style="width:80px">시급성</th>
-          <th style="width:80px">지불의사</th>
-          <th style="width:56px">기존지출</th>
-          <th style="width:80px">경쟁포화</th>
-          <th style="width:64px">자동점수</th>
-          <th style="width:62px">우선순위</th>
-          <th style="width:52px">강사</th>
-          <th style="width:36px"></th>
-        </tr></thead>
-        <tbody id="target-body"></tbody>
-      </table>
-    </div>
-  </div>
 
-  <!-- INSTRUCTORS -->
-  <div id="panel-instructors" class="panel">
-    <div class="toolbar">
-      <div class="left-tools">
+    <!-- INSTRUCTORS -->
+    <div id="panel-instructors" class="panel">
+      <div class="topbar">
+        <div class="topbar-left">
+          <span class="topbar-title">강사 DB</span>
+          <span class="topbar-sub">후보 관리 및 섭외 현황</span>
+        </div>
+        <div class="topbar-right">
+          <button class="tb-btn primary" id="add-inst">+ 강사 추가</button>
+        </div>
+      </div>
+      <div class="filterbar">
         <div class="search-wrap">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="6"/><path d="M15 15l-3.5-3.5"/></svg>
           <input class="search-input" type="text" id="inst-search" placeholder="강사명 검색...">
         </div>
+        <div class="filter-sep"></div>
         <div class="filter-pills" data-filter="ist">
           <button class="pill on" data-val="all">전체</button>
           <button class="pill" data-val="미컨택">미컨택</button>
@@ -231,44 +334,59 @@ tr:hover td{background:#fdf9f5}
           <button class="pill" data-val="완료">완료</button>
         </div>
       </div>
-      <button class="add-btn" id="add-inst">+ 강사 추가</button>
+      <div class="content">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th style="width:96px">강사명</th>
+              <th style="width:158px">연결 주제</th>
+              <th style="width:68px">채널</th>
+              <th style="width:72px">팔로워</th>
+              <th style="width:168px">스토리 요약</th>
+              <th style="width:90px">진심도</th>
+              <th style="width:90px">공감력</th>
+              <th style="width:56px">난이도</th>
+              <th style="width:68px">컨택</th>
+              <th style="width:80px">상태</th>
+              <th style="width:128px">메모</th>
+              <th style="width:36px"></th>
+            </tr></thead>
+            <tbody id="inst-body"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <p class="hint">✦ 셀 클릭 → 팝업 편집 · 별점 클릭으로 즉시 변경</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th style="width:96px">강사명</th>
-          <th style="width:158px">연결 주제</th>
-          <th style="width:68px">채널</th>
-          <th style="width:72px">팔로워</th>
-          <th style="width:168px">스토리 요약</th>
-          <th style="width:90px">진심도</th>
-          <th style="width:90px">공감력</th>
-          <th style="width:56px">난이도</th>
-          <th style="width:68px">컨택</th>
-          <th style="width:80px">상태</th>
-          <th style="width:128px">메모</th>
-          <th style="width:36px"></th>
-        </tr></thead>
-        <tbody id="inst-body"></tbody>
-      </table>
+
+    <!-- KANBAN -->
+    <div id="panel-kanban" class="panel">
+      <div class="topbar">
+        <div class="topbar-left">
+          <span class="topbar-title">칸반 보드</span>
+          <span class="topbar-sub">카드를 드래그해 상태 변경</span>
+        </div>
+      </div>
+      <div class="content" style="overflow-y:auto">
+        <div class="kanban-wrap" id="kanban-wrap"></div>
+      </div>
     </div>
-  </div>
 
-  <!-- KANBAN -->
-  <div id="panel-kanban" class="panel">
-    <p class="hint" style="margin-bottom:14px">✦ 카드를 드래그해서 상태를 변경하세요</p>
-    <div class="kanban-wrap" id="kanban-wrap"></div>
-  </div>
-
-  <!-- MEETINGS -->
-  <div id="panel-meetings" class="panel">
-    <div class="toolbar">
-      <div class="left-tools">
+    <!-- MEETINGS -->
+    <div id="panel-meetings" class="panel">
+      <div class="topbar">
+        <div class="topbar-left">
+          <span class="topbar-title">미팅 로그</span>
+          <span class="topbar-sub">강사 미팅 기록 및 액션 관리</span>
+        </div>
+        <div class="topbar-right">
+          <button class="tb-btn primary" id="add-meet">+ 미팅 추가</button>
+        </div>
+      </div>
+      <div class="filterbar">
         <div class="search-wrap">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="6"/><path d="M15 15l-3.5-3.5"/></svg>
           <input class="search-input" type="text" id="meet-search" placeholder="강사명 검색...">
         </div>
+        <div class="filter-sep"></div>
         <div class="filter-pills" data-filter="mst">
           <button class="pill on" data-val="all">전체</button>
           <button class="pill" data-val="진행중">진행중</button>
@@ -276,36 +394,47 @@ tr:hover td{background:#fdf9f5}
           <button class="pill" data-val="보류">보류</button>
         </div>
       </div>
-      <button class="add-btn" id="add-meet">+ 미팅 추가</button>
+      <div class="content">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th style="width:110px">강사명</th>
+              <th style="width:148px">담당 주제</th>
+              <th style="width:100px">미팅일자</th>
+              <th style="width:158px">논의 주제</th>
+              <th style="width:68px">반응</th>
+              <th style="width:158px">조건/요구사항</th>
+              <th style="width:138px">다음 액션</th>
+              <th style="width:80px">상태</th>
+              <th style="width:36px"></th>
+            </tr></thead>
+            <tbody id="meet-body"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <p class="hint">✦ 강사명 클릭 → 강사 선택 시 담당 주제 자동 연동</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th style="width:110px">강사명</th>
-          <th style="width:148px">담당 주제</th>
-          <th style="width:100px">미팅일자</th>
-          <th style="width:158px">논의 주제</th>
-          <th style="width:68px">반응</th>
-          <th style="width:158px">조건/요구사항</th>
-          <th style="width:138px">다음 액션</th>
-          <th style="width:80px">상태</th>
-          <th style="width:36px"></th>
-        </tr></thead>
-        <tbody id="meet-body"></tbody>
-      </table>
-    </div>
-  </div>
 
-  <!-- DASHBOARD -->
-  <div id="panel-dashboard" class="panel">
-    <div class="stat-grid" id="dash-stats"></div>
-    <div class="dash-grid">
-      <div class="dash-card"><h4>강사 컨택 현황</h4><div id="dash-ist"></div></div>
-      <div class="dash-card"><h4>우선순위별 타겟</h4><div id="dash-prio"></div></div>
-      <div class="dash-card"><h4>섭외 전환 퍼널</h4><div id="dash-funnel"></div></div>
-      <div class="dash-card"><h4>황금 주제 — 시급 높음 + 기존 지출</h4><div id="dash-gold"></div></div>
+    <!-- DASHBOARD -->
+    <div id="panel-dashboard" class="panel">
+      <div class="topbar">
+        <div class="topbar-left">
+          <span class="topbar-title">대시보드</span>
+          <span class="topbar-sub">섭외 현황 한눈에 보기</span>
+        </div>
+      </div>
+      <div class="content" style="overflow-y:auto">
+        <div class="dash-wrap">
+          <div class="stat-grid" id="dash-stats"></div>
+          <div class="dash-grid">
+            <div class="dash-card"><h4>강사 컨택 현황</h4><div id="dash-ist"></div></div>
+            <div class="dash-card"><h4>우선순위별 타겟</h4><div id="dash-prio"></div></div>
+            <div class="dash-card"><h4>섭외 전환 퍼널</h4><div id="dash-funnel"></div></div>
+            <div class="dash-card"><h4>황금 주제 — 시급 높음 + 기존 지출</h4><div id="dash-gold"></div></div>
+          </div>
+        </div>
+      </div>
     </div>
+
   </div>
 </div>
 
@@ -607,7 +736,7 @@ function renderTargets(){
     var recPrio=autoRecommendPrio(t);
     var prioDiff=t.prio!==recPrio?'<span title="추천: '+recPrio+'순위" style="color:#a16207;font-size:10px;margin-left:4px">↕'+recPrio+'</span>':'';
     return'<tr>'
-      +'<td>'+cell('t',t.id,'id','<span style="color:#ccc;font-size:11px">'+t.id+'</span>','',true)+'</td>'
+      +'<td>'+cell('t',t.id,'id','<span style="color:var(--text-3);font-size:11px">'+(String(t.id).startsWith('new')?'···':t.id)+'</span>','',true)+'</td>'
       +'<td>'+selCell(t.cat,'t',t.id,'cat','<span class="badge '+catClass(t.cat)+'">'+t.cat+'</span>')+'</td>'
       +'<td>'+txtCell(t.age,'t',t.id,'age','cell-muted')+'</td>'
       +'<td>'+txtCell(t.pain,'t',t.id,'pain','cell-small')+'</td>'
@@ -749,7 +878,12 @@ function renderDashboard(){
 }
 function sc(l,v,sub){return'<div class="stat-card"><div class="stat-label">'+l+'</div><div class="stat-val">'+v+'</div>'+(sub?'<div class="stat-sub">'+sub+'</div>':'')+'</div>';}
 function barRow(l,n,max,color){return'<div class="bar-row"><span class="bar-label">'+l+'</span><div class="bar-track"><div class="bar-fill" style="width:'+(max?Math.round(n/max*100):0)+'%;background:'+color+'"></div></div><span class="bar-val">'+n+'</span></div>';}
-function renderAll(){renderTargets();renderInstructors();renderMeetings();}
+function updateNavCounts(){
+  var tc=document.getElementById('nav-count-targets');if(tc)tc.textContent=targets.length;
+  var ic=document.getElementById('nav-count-inst');if(ic)ic.textContent=instructors.length;
+  var mc=document.getElementById('nav-count-meet');if(mc)mc.textContent=meetings.length;
+}
+function renderAll(){renderTargets();renderInstructors();renderMeetings();updateNavCounts();}
 
 // ── drilldown ──
 function openDrill(tid){
@@ -791,9 +925,9 @@ document.getElementById('export-xlsx').addEventListener('click',function(){
 
 // ── event delegation ──
 document.addEventListener('click',function(e){
-  var tab=e.target.closest('.tab');
+  var tab=e.target.closest('.nav-item');
   if(tab&&tab.dataset.tab){
-    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});tab.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(function(t){t.classList.remove('active');});tab.classList.add('active');
     document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
     document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
     if(tab.dataset.tab==='dashboard')renderDashboard();
@@ -809,19 +943,19 @@ document.addEventListener('click',function(e){
   }
   if(e.target.id==='add-target'){
     var nt={id:'new_'+Date.now(),cat:'남성',age:'',pain:'',slogan:'새 주제',period:'90일',resultNum:'',resultEmo:'',urgency:'높음',spend:'중간',existing:'N - 새 시장',competition:'중간',prio:'3'};
-    targets.push(nt);renderTargets();
-    saveTarget(nt).then(function(){renderTargets();});return;
+    targets.push(nt);renderTargets();updateNavCounts();
+    saveTarget(nt).then(function(){renderTargets();updateNavCounts();});return;
   }
   if(e.target.id==='add-inst'){
     var ni={id:'new_'+Date.now(),name:'새 강사',targetId:targets[0]?targets[0].id:null,channel:'유튜브',followers:'',story:'',sincerity:3,empathy:3,diff:'중',contact:'DM',status:'미컨택',memo:''};
-    instructors.push(ni);renderInstructors();
-    saveInstructor(ni).then(function(){renderInstructors();});return;
+    instructors.push(ni);renderInstructors();updateNavCounts();
+    saveInstructor(ni).then(function(){renderInstructors();updateNavCounts();});return;
   }
   if(e.target.id==='add-meet'){
     var fi=instructors[0];var lk=fi?targets.find(function(t){return t.id==fi.targetId;}):null;
     var nm={id:'new_'+Date.now(),instId:fi?fi.id:null,instName:fi?fi.name:'',linkedSlogan:lk?lk.slogan:'',date:'',topic:'',reaction:'긍정',conditions:'',next:'',status:'진행중'};
-    meetings.push(nm);renderMeetings();
-    saveMeeting(nm).then(function(){renderMeetings();});return;
+    meetings.push(nm);renderMeetings();updateNavCounts();
+    saveMeeting(nm).then(function(){renderMeetings();updateNavCounts();});return;
   }
   var del=e.target.closest('.del-btn');
   if(del){
