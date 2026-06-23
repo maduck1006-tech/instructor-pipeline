@@ -2,6 +2,9 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>강사 섭외 파이프라인</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -229,6 +232,63 @@ tr:hover .del-btn{opacity:1}
 .col-toggle-item:hover{background:var(--bg-3);color:var(--text-1)}
 .col-toggle-item input{accent-color:var(--accent);cursor:pointer}
 
+
+/* ── onboarding ── */
+.onboard-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.onboard-bg.open{display:flex}
+.onboard-box{background:var(--bg-2);border:1px solid var(--border-2);border-radius:16px;padding:36px 40px;width:520px;max-width:94vw;position:relative}
+.onboard-step{display:none}.onboard-step.active{display:block}
+.onboard-badge{display:inline-block;background:rgba(94,106,210,.2);color:var(--accent-2);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px;margin-bottom:16px}
+.onboard-icon{font-size:40px;margin-bottom:14px}
+.onboard-title{font-size:20px;font-weight:700;color:var(--text-1);margin-bottom:10px;letter-spacing:-.3px}
+.onboard-desc{font-size:13.5px;color:var(--text-2);line-height:1.8;margin-bottom:20px}
+.onboard-desc strong{color:var(--text-1)}
+.onboard-progress{display:flex;gap:5px;margin-bottom:24px}
+.onboard-dot{width:6px;height:6px;border-radius:50%;background:var(--border-2);transition:all .2s}
+.onboard-dot.on{background:var(--accent);width:18px;border-radius:3px}
+.onboard-footer{display:flex;justify-content:space-between;align-items:center}
+.onboard-skip{font-size:12.5px;color:var(--text-3);cursor:pointer;background:none;border:none;font-family:Pretendard,sans-serif;padding:0}
+.onboard-skip:hover{color:var(--text-2)}
+.onboard-next{padding:9px 24px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:Pretendard,sans-serif;transition:all .12s}
+.onboard-next:hover{background:var(--accent-2)}
+.onboard-prev{padding:9px 16px;border:1px solid var(--border-2);border-radius:8px;background:none;color:var(--text-2);font-size:13px;font-weight:500;cursor:pointer;font-family:Pretendard,sans-serif;margin-right:8px}
+.onboard-highlight{background:rgba(94,106,210,.15);border:1px solid rgba(94,106,210,.3);border-radius:6px;padding:12px 14px;margin:12px 0;font-size:12.5px;color:var(--text-2);line-height:1.7}
+.onboard-highlight code{background:rgba(94,106,210,.2);color:var(--accent-2);padding:1px 6px;border-radius:4px;font-size:12px}
+
+/* ── guide card (empty state) ── */
+.guide-card{background:var(--bg-1);border:1px solid var(--border);border-radius:12px;padding:32px;margin:20px 24px;display:flex;flex-direction:column;gap:16px}
+.guide-card-title{font-size:15px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:8px}
+.guide-steps{display:flex;flex-direction:column;gap:10px}
+.guide-step{display:flex;align-items:flex-start;gap:12px}
+.guide-step-num{width:22px;height:22px;border-radius:50%;background:rgba(94,106,210,.2);color:var(--accent-2);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.guide-step-text{font-size:13px;color:var(--text-2);line-height:1.6}
+.guide-step-text strong{color:var(--text-1)}
+
+/* ── tooltip ── */
+.tip{position:relative;display:inline-flex;align-items:center}
+.tip-icon{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.1);color:var(--text-3);font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:help;margin-left:4px;flex-shrink:0;line-height:1}
+.tip-icon:hover{background:rgba(94,106,210,.3);color:var(--accent-2)}
+.tip-box{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--bg-2);border:1px solid var(--border-2);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--text-2);white-space:nowrap;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.5);max-width:240px;white-space:normal;line-height:1.5;pointer-events:none}
+.tip-icon:hover + .tip-box,.tip:hover .tip-box{display:block}
+
+/* ── help sidebar ── */
+.help-panel{display:none;position:fixed;right:0;top:0;height:100vh;width:320px;background:var(--bg-2);border-left:1px solid var(--border-2);z-index:7000;overflow-y:auto;box-shadow:-8px 0 32px rgba(0,0,0,.4)}
+.help-panel.open{display:block}
+.help-header{padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.help-header h3{font-size:14px;font-weight:600;color:var(--text-1)}
+.help-close{border:none;background:none;color:var(--text-3);font-size:16px;cursor:pointer}
+.help-close:hover{color:var(--text-1)}
+.help-section{padding:16px 20px;border-bottom:1px solid var(--border)}
+.help-section h4{font-size:11.5px;font-weight:700;color:var(--accent-2);margin-bottom:10px;letter-spacing:.3px;text-transform:uppercase}
+.help-item{margin-bottom:12px}
+.help-item .label{font-size:12.5px;font-weight:600;color:var(--text-1);margin-bottom:3px}
+.help-item .desc{font-size:12px;color:var(--text-3);line-height:1.6}
+.help-shortcut{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12.5px}
+.help-shortcut:last-child{border-bottom:none}
+.help-shortcut .key{background:var(--bg-3);border:1px solid var(--border-2);border-radius:4px;padding:2px 7px;font-size:11px;color:var(--text-2);font-family:monospace}
+.nav-help{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--text-3);transition:all .12s;border:none;background:none;width:100%;text-align:left;font-family:Pretendard,sans-serif;margin-top:4px}
+.nav-help:hover{background:var(--bg-3);color:var(--text-2)}
+
 </style>
 </head>
 <body>
@@ -264,6 +324,12 @@ tr:hover .del-btn{opacity:1}
       <button class="nav-item" data-tab="dashboard">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10l4-4 3 3 5-5"/></svg>
         대시보드
+      </button>
+    </div>
+    <div class="sidebar-section" style="margin-top:8px">
+      <button class="nav-help" id="help-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 11v.5M8 5a2 2 0 011 3.7c-.6.4-1 .9-1 1.3"/></svg>
+        도움말
       </button>
     </div>
     <div class="sidebar-bottom">
@@ -327,10 +393,10 @@ tr:hover .del-btn{opacity:1}
               <th style="width:80px">지불의사</th>
               <th style="width:56px">기존지출</th>
               <th style="width:80px">경쟁포화</th>
-              <th style="width:64px">자동점수</th>
+              <th style="width:64px"><span class="tip">자동점수<span class="tip-icon">?</span><span class="tip-box">시급성+지불의사+기존지출+경쟁포화를 자동 계산.<br>S급(10+) A급(7+) B급(4+) C급</span></span></th>
               <th style="width:62px">우선순위</th>
               <th style="width:52px">강사</th>
-              <th style="width:48px">AI</th>
+              <th style="width:48px"><span class="tip">AI<span class="tip-icon">?</span><span class="tip-box">클릭하면 AI가 빈 칸을 자동완성합니다</span></span></th>
               <th style="width:36px"></th>
             </tr></thead>
             <tbody id="target-body"></tbody>
@@ -397,8 +463,8 @@ tr:hover .del-btn{opacity:1}
               <th style="width:68px">채널</th>
               <th style="width:72px">팔로워</th>
               <th style="width:150px">스토리 요약</th>
-              <th style="width:90px">진심도</th>
-              <th style="width:90px">공감력</th>
+              <th style="width:90px"><span class="tip">진심도<span class="tip-icon">?</span><span class="tip-box">이 문제에 얼마나 몰입해 있는지.<br>별점 클릭으로 즉시 변경</span></span></th>
+              <th style="width:90px"><span class="tip">공감력<span class="tip-icon">?</span><span class="tip-box">수강생의 고통에 직접 공감할 수 있는지.<br>본인 경험 여부가 핵심</span></span></th>
               <th style="width:56px">난이도</th>
               <th style="width:68px">컨택</th>
               <th style="width:80px">상태</th>
@@ -507,6 +573,180 @@ tr:hover .del-btn{opacity:1}
   <span id="toast-msg"></span>
   <button class="toast-undo" id="toast-undo" style="display:none">되돌리기</button>
   <div class="toast-progress" id="toast-progress"></div>
+</div>
+
+
+<!-- 온보딩 튜토리얼 -->
+<div class="onboard-bg" id="onboard-bg">
+  <div class="onboard-box">
+    <div class="onboard-progress" id="onboard-progress"></div>
+
+    <div class="onboard-step active" data-step="0">
+      <div class="onboard-icon">👋</div>
+      <div class="onboard-badge">WELCOME</div>
+      <div class="onboard-title">강사 섭외 파이프라인에<br>오신 걸 환영합니다</div>
+      <div class="onboard-desc">
+        이 툴은 <strong>타겟 → 문제 → 강사 매칭</strong> 순서로<br>
+        온라인 교육 콘텐츠를 기획하는 도구입니다.<br><br>
+        사람을 먼저 찾는 게 아니라, <strong>고객의 고통을 먼저 정의</strong>하고<br>
+        그에 맞는 강사를 찾는 방식으로 기획 시간을 단축합니다.
+      </div>
+      <div class="onboard-highlight">
+        ⏱ 설명은 약 1분 소요됩니다. 언제든 건너뛸 수 있어요.
+      </div>
+    </div>
+
+    <div class="onboard-step" data-step="1">
+      <div class="onboard-icon">🎯</div>
+      <div class="onboard-badge">STEP 1</div>
+      <div class="onboard-title">타겟 × 주제 탭</div>
+      <div class="onboard-desc">
+        먼저 <strong>공략할 타겟과 핵심 고통</strong>을 정의합니다.<br><br>
+        • <strong>+ 타겟 추가</strong> 버튼으로 새 행 추가<br>
+        • <strong>✦ AI 버튼</strong>을 클릭하면 대분류·연령·고통 입력 후 나머지 칸을 AI가 자동완성<br>
+        • 자동점수(S/A/B/C)는 시급성·지불의사·기존지출·경쟁포화를 자동 계산
+      </div>
+      <div class="onboard-highlight">
+        💡 <strong>셀을 클릭</strong>하면 팝업으로 바로 수정할 수 있습니다.<br>
+        <code>Ctrl+Z</code>로 언제든 되돌리기 가능합니다.
+      </div>
+    </div>
+
+    <div class="onboard-step" data-step="2">
+      <div class="onboard-icon">🎤</div>
+      <div class="onboard-badge">STEP 2</div>
+      <div class="onboard-title">강사 DB 탭</div>
+      <div class="onboard-desc">
+        <strong>+ 강사 추가</strong>를 클릭하면 AI 분석 팝업이 열립니다.<br><br>
+        • 강사의 <strong>인스타그램/유튜브 주소</strong>를 입력하면<br>
+        &nbsp;&nbsp;AI가 적합한 주제를 자동으로 매칭해줍니다<br>
+        • 진심도⭐와 공감력⭐는 별점 클릭으로 즉시 변경<br>
+        • 필터로 상태·채널·난이도·주제별 강사 필터링 가능
+      </div>
+      <div class="onboard-highlight">
+        💡 강사 수 숫자를 클릭하면 해당 주제의 강사 목록을 바로 볼 수 있어요.
+      </div>
+    </div>
+
+    <div class="onboard-step" data-step="3">
+      <div class="onboard-icon">📋</div>
+      <div class="onboard-badge">STEP 3</div>
+      <div class="onboard-title">칸반 보드 & 미팅 로그</div>
+      <div class="onboard-desc">
+        <strong>칸반 보드</strong>에서 강사 카드를 드래그해<br>
+        미컨택 → 컨택중 → 미팅확정 → 협의중 → 완료<br>
+        상태를 바꿀 수 있습니다.<br><br>
+        <strong>미팅 로그</strong>에서 강사명을 클릭해 강사를 연결하면<br>
+        담당 주제가 자동으로 연동됩니다.
+      </div>
+    </div>
+
+    <div class="onboard-step" data-step="4">
+      <div class="onboard-icon">⚡</div>
+      <div class="onboard-badge">단축키</div>
+      <div class="onboard-title">알아두면 편한 기능들</div>
+      <div class="onboard-desc">
+        • <code style="background:rgba(94,106,210,.2);color:var(--accent-2);padding:1px 6px;border-radius:4px">Ctrl+Z</code> 무한 되돌리기 (수정/삭제 모두)<br>
+        • 삭제 시 <strong>5초 안에 "되돌리기"</strong> 클릭하면 복구<br>
+        • 상단 <strong>CSV/엑셀</strong> 버튼으로 데이터 내보내기<br>
+        • 데이터는 <strong>Supabase 클라우드</strong>에 자동 저장<br>
+        &nbsp;&nbsp;어떤 기기·브라우저에서든 동일한 데이터
+      </div>
+      <div class="onboard-highlight">
+        🎉 이제 시작해볼까요? 언제든 사이드바 하단 <strong>도움말</strong>에서 다시 볼 수 있어요.
+      </div>
+    </div>
+
+    <div class="onboard-footer">
+      <button class="onboard-skip" id="onboard-skip">건너뛰기</button>
+      <div>
+        <button class="onboard-prev" id="onboard-prev" style="display:none">← 이전</button>
+        <button class="onboard-next" id="onboard-next">다음 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 도움말 패널 -->
+<div class="help-panel" id="help-panel">
+  <div class="help-header">
+    <h3>📖 도움말</h3>
+    <button class="help-close" id="help-close">✕</button>
+  </div>
+  <div class="help-section">
+    <h4>시작하기</h4>
+    <div class="help-item"><div class="label">1. 타겟 정의</div><div class="desc">타겟 × 주제 탭에서 공략할 고객의 고통을 먼저 정의하세요. ✦ AI 버튼으로 자동완성 가능.</div></div>
+    <div class="help-item"><div class="label">2. 강사 추가</div><div class="desc">강사 DB 탭에서 + 강사 추가 클릭. SNS 주소 입력 시 AI가 적합한 주제를 매칭합니다.</div></div>
+    <div class="help-item"><div class="label">3. 상태 관리</div><div class="desc">칸반 보드에서 드래그로 섭외 단계를 관리하세요.</div></div>
+    <div class="help-item"><div class="label">4. 미팅 기록</div><div class="desc">미팅 로그에서 강사와의 대화 내용과 다음 액션을 기록하세요.</div></div>
+  </div>
+  <div class="help-section">
+    <h4>셀 편집</h4>
+    <div class="help-item"><div class="label">셀 클릭</div><div class="desc">모든 셀을 클릭하면 팝업이 뜨고 바로 수정할 수 있습니다.</div></div>
+    <div class="help-item"><div class="label">드롭다운 셀</div><div class="desc">대분류, 상태, 시급성 등은 클릭 시 선택 팝업이 열립니다.</div></div>
+    <div class="help-item"><div class="label">별점</div><div class="desc">진심도/공감력은 별★을 직접 클릭해서 즉시 변경합니다.</div></div>
+  </div>
+  <div class="help-section">
+    <h4>AI 기능</h4>
+    <div class="help-item"><div class="label">타겟 자동완성</div><div class="desc">타겟 행의 ✦ AI 버튼 → 대분류+연령+고통 입력 → AI가 슬로건, 결과, 시급성 등을 채워줍니다.</div></div>
+    <div class="help-item"><div class="label">강사 AI 분석</div><div class="desc">+ 강사 추가 → SNS 주소 입력 → AI가 적합한 주제 매칭 + 프로필 분석.</div></div>
+  </div>
+  <div class="help-section">
+    <h4>단축키</h4>
+    <div class="help-shortcut"><span>되돌리기</span><span class="key">Ctrl+Z</span></div>
+    <div class="help-shortcut"><span>강제 새로고침</span><span class="key">Cmd+Shift+R</span></div>
+    <div class="help-shortcut"><span>팝업 닫기</span><span class="key">Esc</span></div>
+    <div class="help-shortcut"><span>팝업 저장</span><span class="key">Enter</span></div>
+  </div>
+  <div class="help-section">
+    <h4>자동점수 기준</h4>
+    <div class="help-item"><div class="label">S급 (10점+)</div><div class="desc">시급성 매우높음 + 지불의사 매우높음 + 기존지출 Y + 블루오션</div></div>
+    <div class="help-item"><div class="label">A급 (7~9점)</div><div class="desc">시급성 높음 이상 + 지불의사 높음 이상</div></div>
+    <div class="help-item"><div class="label">B급 (4~6점)</div><div class="desc">평균적인 시장성</div></div>
+    <div class="help-item"><div class="label">C급 (~3점)</div><div class="desc">시장성 낮음, 우선순위 후순위</div></div>
+  </div>
+  <div style="padding:16px 20px">
+    <button onclick="startOnboard()" style="width:100%;padding:10px;border:1px solid var(--border-2);border-radius:8px;background:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">🎓 튜토리얼 다시 보기</button>
+  </div>
+</div>
+
+
+<!-- 강사 AI 분석 팝업 -->
+<div class="modal-bg" id="inst-ai-modal">
+  <div class="modal-box" style="width:480px">
+    <button class="modal-close" onclick="document.getElementById('inst-ai-modal').classList.remove('open')">✕</button>
+    <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <span style="color:var(--accent-2)">✦</span> 강사 AI 분석
+    </h3>
+    <div class="modal-sub">SNS 주소를 입력하면 AI가 강사 프로필을 분석하고<br>적합한 주제를 자동으로 매칭해드립니다</div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">강사명 <span style="color:var(--red)">*</span></label>
+        <input id="inst-ai-name" type="text" placeholder="예: 김트레이너, 박코치" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">인스타그램</label>
+        <input id="inst-ai-instagram" type="text" placeholder="예: instagram.com/username 또는 @username" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">유튜브</label>
+        <input id="inst-ai-youtube" type="text" placeholder="예: youtube.com/@channel" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">강사 소개 / 콘텐츠 설명 <span style="color:var(--text-3);font-weight:400">(선택)</span></label>
+        <textarea id="inst-ai-desc" placeholder="예: 고도비만 경험자 출신 헬스 트레이너. 인스타 팔로워 5만. 주로 다이어트 식단과 운동 루틴 콘텐츠를 올림" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none;resize:none;min-height:80px;line-height:1.6"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
+      <button id="inst-ai-skip" style="padding:8px 14px;border:1px solid var(--border-2);border-radius:7px;background:none;color:var(--text-3);font-size:12.5px;cursor:pointer;font-family:Pretendard,sans-serif">AI 없이 직접 추가</button>
+      <div style="display:flex;gap:8px">
+        <button onclick="document.getElementById('inst-ai-modal').classList.remove('open')" style="padding:8px 16px;border:1px solid var(--border-2);border-radius:7px;background:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">취소</button>
+        <button id="inst-ai-run" style="padding:8px 20px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;font-weight:600;font-family:Pretendard,sans-serif">✦ AI 분석 시작</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- AI 입력 팝업 -->
@@ -977,7 +1217,7 @@ function renderTargets(){
     return true;
   }));
   var body=document.getElementById('target-body');
-  if(!rows.length){body.innerHTML='<tr><td colspan="17"><div class="empty-state"><div class="empty-state-icon">🎯</div><div class="empty-state-title">타겟이 없습니다</div><div class="empty-state-sub">우측 상단 "+ 타겟 추가"로 시작하세요</div></div></td></tr>';return;}
+  if(!rows.length){body.innerHTML='<tr><td colspan="17"><div class="guide-card"><div class="guide-card-title">🎯 타겟을 추가해보세요</div><div class="guide-steps"><div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text"><strong>+ 타겟 추가</strong> 버튼 클릭으로 새 행 추가</div></div><div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text"><strong>대분류, 연령, 핵심 고통</strong> 입력 (셀 클릭)</div></div><div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text">행 우측 <strong>✦ AI 버튼</strong>으로 나머지 칸 자동완성</div></div></div></div></td></tr>';return;}
   body.innerHTML=rows.map(function(t){
     var cnt=instructors.filter(function(i){return i.targetId==t.id;}).length;
     var ey=t.existing&&t.existing.indexOf('Y')===0;
@@ -1025,7 +1265,7 @@ function renderInstructors(){
     });
   }
   var body=document.getElementById('inst-body');
-  if(!rows.length){body.innerHTML='<tr><td colspan="20"><div class="empty-state"><div class="empty-state-icon">🎤</div><div class="empty-state-title">강사 후보가 없습니다</div><div class="empty-state-sub">"+ 강사 추가"로 후보를 등록하세요</div></div></td></tr>';return;}
+  if(!rows.length){body.innerHTML='<tr><td colspan="20"><div class="guide-card"><div class="guide-card-title">🎤 강사 후보를 등록해보세요</div><div class="guide-steps"><div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text"><strong>+ 강사 추가</strong> 클릭</div></div><div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text">강사 이름 + <strong>인스타/유튜브 주소</strong> 입력</div></div><div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text">AI가 <strong>적합한 주제 자동 매칭</strong> + 프로필 분석</div></div></div></div></td></tr>';return;}
   body.innerHTML=rows.map(function(i){
     var t=targets.find(function(t){return t.id==i.targetId;});
     return'<tr>'
@@ -1095,7 +1335,7 @@ function renderMeetings(){
     return true;
   });
   var body=document.getElementById('meet-body');
-  if(!rows.length){body.innerHTML='<tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">📅</div><div class="empty-state-title">미팅 로그가 없습니다</div><div class="empty-state-sub">강사와의 미팅 내용을 기록하세요</div></div></td></tr>';return;}
+  if(!rows.length){body.innerHTML='<tr><td colspan="9"><div class="guide-card"><div class="guide-card-title">📅 미팅 로그를 기록해보세요</div><div class="guide-steps"><div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text"><strong>+ 미팅 추가</strong> 클릭</div></div><div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text"><strong>강사명 셀</strong>을 클릭해 강사 DB에서 연결</div></div><div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text">반응, 조건, <strong>다음 액션</strong>을 기록하세요</div></div></div></div></td></tr>';return;}
   body.innerHTML=rows.map(function(m){
     var mstBadge=m.status==='완료'?'ist-3':m.status==='보류'?'ist-4':'ist-1';
     var instDisp=m.instName?'<span style="font-weight:600;color:var(--text-1)">'+m.instName+'</span>':'<span style="color:var(--text-3);font-size:12px">강사 선택 →</span>';
@@ -1148,7 +1388,187 @@ function renderDashboard(){
 function sc(l,v,sub){return'<div class="stat-card"><div class="stat-label">'+l+'</div><div class="stat-val">'+v+'</div>'+(sub?'<div class="stat-sub">'+sub+'</div>':'')+'</div>';}
 function barRow(l,n,max,color){return'<div class="bar-row"><span class="bar-label">'+l+'</span><div class="bar-track"><div class="bar-fill" style="width:'+(max?Math.round(n/max*100):0)+'%;background:'+color+'"></div></div><span class="bar-val">'+n+'</span></div>';}
 
-// ── Groq AI 자동완성 ──
+// ── 강사 AI 분석 ──
+function openInstAiPopup(){
+  document.getElementById('inst-ai-name').value='';
+  document.getElementById('inst-ai-instagram').value='';
+  document.getElementById('inst-ai-youtube').value='';
+  document.getElementById('inst-ai-desc').value='';
+  document.getElementById('inst-ai-modal').classList.add('open');
+  setTimeout(function(){document.getElementById('inst-ai-name').focus();},100);
+}
+
+function runInstAi(){
+  var name=document.getElementById('inst-ai-name').value.trim();
+  var instagram=document.getElementById('inst-ai-instagram').value.trim();
+  var youtube=document.getElementById('inst-ai-youtube').value.trim();
+  var desc=document.getElementById('inst-ai-desc').value.trim();
+
+  if(!name){document.getElementById('inst-ai-name').focus();showToast('강사명을 입력해주세요',true,false);return;}
+  if(!instagram&&!youtube&&!desc){showToast('SNS 주소 또는 소개를 하나 이상 입력해주세요',true,false);return;}
+
+  document.getElementById('inst-ai-modal').classList.remove('open');
+  showLoading();
+  document.getElementById('save-label').textContent='AI 분석 중...';
+
+  // 현재 등록된 타겟 목록 전달
+  var targetList=targets.map(function(t,i){
+    return (i+1)+'. [ID:'+t.id+'] '+t.slogan+' ('+t.cat+' '+t.age+', '+t.urgency+' 시급성)';
+  }).join('\n');
+
+  var prompt='당신은 한국 온라인 교육 콘텐츠 강사 섭외 전문가입니다.\n\n'
+    +'아래 강사 정보를 분석해서 JSON으로 답해주세요.\n\n'
+    +'[강사 정보]\n'
+    +'이름: '+name+'\n'
+    +(instagram?'인스타그램: '+instagram+'\n':'')
+    +(youtube?'유튜브: '+youtube+'\n':'')
+    +(desc?'소개: '+desc+'\n':'')
+    +'\n[현재 등록된 주제 목록]\n'+targetList+'\n\n'
+    +'[분석 요청]\n'
+    +'1. 강사의 전문 분야와 콘텐츠 스타일을 파악하세요\n'
+    +'2. 위 주제 목록 중 가장 적합한 주제 ID를 선택하세요\n'
+    +'3. 강사의 스토리를 한 줄로 요약하세요\n'
+    +'4. 채널 종류, 섭외 난이도, 진심도, 공감력을 추정하세요\n\n'
+    +'[출력 형식 - JSON만 출력]\n'
+    +'{\n'
+    +'"bestTargetId": "가장 적합한 주제의 ID (숫자)",\n'
+    +'"story": "강사 스토리 한 줄 요약 (예: 고도비만 경험자 출신 → 3년만에 -30kg 달성)",\n'
+    +'"channel": "유튜브 또는 인스타 또는 블로그 또는 틱톡 또는 오프라인 또는 복합",\n'
+    +'"followers": "팔로워 수 추정 (SNS 주소로 유추, 모르면 빈 문자열)",\n'
+    +'"sincerity": "1~5 숫자 (문제에 얼마나 진심인지)",\n'
+    +'"empathy": "1~5 숫자 (수강생과 공감할 수 있는지)",\n'
+    +'"diff": "하 또는 중 또는 상 (섭외 난이도)",\n'
+    +'"contact": "DM 또는 이메일 또는 지인 소개 또는 직접 방문",\n'
+    +'"reason": "이 주제를 추천하는 이유 한 줄"\n'
+    +'}';
+
+  fetch(GROQ_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+    body:JSON.stringify({
+      model:'llama-3.3-70b-versatile',
+      messages:[
+        {role:'system',content:'당신은 한국 온라인 교육 콘텐츠 강사 섭외 전문가입니다. 반드시 JSON만 출력하세요.'},
+        {role:'user',content:prompt}
+      ],
+      temperature:0.6,max_tokens:512
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var text=data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
+    if(!text)throw new Error('응답 없음');
+    var match=text.match(/\{[\s\S]*\}/);
+    if(!match)throw new Error('JSON 파싱 실패');
+    var result=JSON.parse(match[0]);
+    hideLoading();
+
+    // 새 강사 객체 생성
+    var ni={
+      id:'new_'+Date.now(),
+      name:name,
+      targetId:parseInt(result.bestTargetId)||( targets[0]?targets[0].id:null),
+      channel:result.channel||'유튜브',
+      followers:result.followers||'',
+      story:result.story||'',
+      sincerity:parseInt(result.sincerity)||3,
+      empathy:parseInt(result.empathy)||3,
+      diff:result.diff||'중',
+      contact:result.contact||'DM',
+      status:'미컨택',
+      memo:result.reason||'',
+      instagram:instagram||'',
+      youtube:youtube||'',
+      blog:'',threads:'',website:'',email:'',phone:'',kakao:''
+    };
+
+    instructors.push(ni);
+    renderInstructors();
+    updateNavCounts();
+    saveInstructor(ni).then(function(){renderInstructors();updateNavCounts();});
+
+    var matchedTarget=targets.find(function(t){return t.id==ni.targetId;});
+    showToast('✦ '+name+' 추가됨 — '+(matchedTarget?'"'+matchedTarget.slogan+'"에 매칭':'주제 매칭 완료'),false,false);
+  })
+  .catch(function(err){
+    console.error(err);
+    hideLoading();
+    showToast('AI 오류: '+err.message,true,false);
+    // 오류 시 그냥 빈 강사로 추가
+    addInstDirect(name,instagram,youtube);
+  });
+}
+
+function addInstDirect(name,instagram,youtube){
+  var ni={id:'new_'+Date.now(),name:name||'새 강사',targetId:targets[0]?targets[0].id:null,channel:'유튜브',followers:'',story:'',sincerity:3,empathy:3,diff:'중',contact:'DM',status:'미컨택',memo:'',instagram:instagram||'',youtube:youtube||'',blog:'',threads:'',website:'',email:'',phone:'',kakao:''};
+  instructors.push(ni);renderInstructors();updateNavCounts();
+  saveInstructor(ni).then(function(){renderInstructors();updateNavCounts();});
+  document.getElementById('inst-ai-modal').classList.remove('open');
+}
+
+// ── 온보딩 튜토리얼 ──
+var TOTAL_STEPS=5;
+var curStep=0;
+
+function initOnboard(){
+  var dots=document.getElementById('onboard-progress');
+  dots.innerHTML='';
+  for(var i=0;i<TOTAL_STEPS;i++){
+    var d=document.createElement('div');
+    d.className='onboard-dot'+(i===0?' on':'');
+    dots.appendChild(d);
+  }
+}
+
+function goStep(n){
+  curStep=Math.max(0,Math.min(TOTAL_STEPS-1,n));
+  document.querySelectorAll('.onboard-step').forEach(function(s,i){
+    s.classList.toggle('active',i===curStep);
+  });
+  document.querySelectorAll('.onboard-dot').forEach(function(d,i){
+    d.classList.toggle('on',i===curStep);
+  });
+  var prev=document.getElementById('onboard-prev');
+  var next=document.getElementById('onboard-next');
+  prev.style.display=curStep===0?'none':'inline-block';
+  next.textContent=curStep===TOTAL_STEPS-1?'시작하기 🚀':'다음 →';
+}
+
+function startOnboard(){
+  document.getElementById('help-panel').classList.remove('open');
+  curStep=0;
+  initOnboard();
+  goStep(0);
+  document.getElementById('onboard-bg').classList.add('open');
+}
+
+function closeOnboard(){
+  document.getElementById('onboard-bg').classList.remove('open');
+  localStorage.setItem('pip_onboarded','1');
+}
+
+document.getElementById('onboard-next').addEventListener('click',function(){
+  if(curStep===TOTAL_STEPS-1){closeOnboard();}
+  else{goStep(curStep+1);}
+});
+document.getElementById('onboard-prev').addEventListener('click',function(){goStep(curStep-1);});
+document.getElementById('onboard-skip').addEventListener('click',closeOnboard);
+document.getElementById('onboard-bg').addEventListener('click',function(e){if(e.target===this)closeOnboard();});
+
+// 도움말 패널
+document.getElementById('help-btn').addEventListener('click',function(){
+  document.getElementById('help-panel').classList.toggle('open');
+});
+document.getElementById('help-close').addEventListener('click',function(){
+  document.getElementById('help-panel').classList.remove('open');
+});
+
+// 첫 방문 시 온보딩 자동 실행
+if(!localStorage.getItem('pip_onboarded')){
+  setTimeout(function(){initOnboard();startOnboard();},600);
+}
+
+// ── 강사 AI 팝업 이벤트 ──
 var GROQ_KEY='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';
 var GROQ_URL='https://api.groq.com/openai/v1/chat/completions';
 
@@ -1421,6 +1841,17 @@ function openDrill(tid){
     :'<div class="modal-empty">연결된 강사가 없습니다</div>';
   document.getElementById('drill-modal').classList.add('open');
 }
+document.getElementById('inst-ai-run').addEventListener('click',runInstAi);
+document.getElementById('inst-ai-skip').addEventListener('click',function(){
+  var name=document.getElementById('inst-ai-name').value.trim();
+  var ig=document.getElementById('inst-ai-instagram').value.trim();
+  var yt=document.getElementById('inst-ai-youtube').value.trim();
+  addInstDirect(name,ig,yt);
+});
+document.getElementById('inst-ai-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+// Enter 키
+document.getElementById('inst-ai-name').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('inst-ai-instagram').focus();});
+
 document.getElementById('ai-preview-close').addEventListener('click',closeAiPreview);
 document.getElementById('ai-preview-cancel').addEventListener('click',closeAiPreview);
 document.getElementById('ai-preview-apply').addEventListener('click',applyAiPreview);
@@ -1504,9 +1935,7 @@ document.addEventListener('click',function(e){
     saveTarget(nt).then(function(){renderTargets();updateNavCounts();});return;
   }
   if(e.target.id==='add-inst'){
-    var ni={id:'new_'+Date.now(),name:'새 강사',targetId:targets[0]?targets[0].id:null,channel:'유튜브',followers:'',story:'',sincerity:3,empathy:3,diff:'중',contact:'DM',status:'미컨택',memo:''};
-    instructors.push(ni);renderInstructors();updateNavCounts();
-    saveInstructor(ni).then(function(){renderInstructors();updateNavCounts();});return;
+    openInstAiPopup();return;
   }
   if(e.target.id==='add-meet'){
     var fi=instructors[0];var lk=fi?targets.find(function(t){return t.id==fi.targetId;}):null;
