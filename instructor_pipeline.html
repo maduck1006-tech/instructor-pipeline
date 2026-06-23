@@ -215,9 +215,12 @@ tr:hover .del-btn{opacity:1}
 /* ── loading ── */
 .loading-bar{height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));position:fixed;top:0;left:0;z-index:99999;transition:width .3s}
 /* ── toast ── */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--bg-2);border:1px solid var(--border-2);border-radius:8px;padding:10px 16px;font-size:12.5px;color:var(--text-1);box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;gap:8px;transform:translateY(8px);opacity:0;transition:all .2s;pointer-events:none}
-.toast.show{transform:translateY(0);opacity:1}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg-2);border:1px solid var(--border-2);border-radius:8px;padding:10px 16px;font-size:12.5px;color:var(--text-1);box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;gap:10px;transform:translateY(8px);opacity:0;transition:all .2s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
 .toast-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.toast-undo{padding:3px 10px;border:1px solid var(--border-2);border-radius:5px;background:transparent;color:var(--text-1);font-size:12px;font-weight:600;cursor:pointer;font-family:'Pretendard',sans-serif;transition:all .1s;flex-shrink:0}
+.toast-undo:hover{background:var(--bg-3)}
+.toast-progress{position:absolute;bottom:0;left:0;height:2px;background:var(--accent);border-radius:0 0 8px 8px;transition:width linear}
 /* ── column visibility ── */
 .col-toggle-wrap{position:relative}
 .col-toggle-menu{display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg-2);border:1px solid var(--border-2);border-radius:8px;padding:6px;min-width:160px;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,.5)}
@@ -488,7 +491,12 @@ tr:hover .del-btn{opacity:1}
 
 
 <div class="loading-bar" id="loading-bar" style="width:0"></div>
-<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
+<div class="toast" id="toast" style="position:fixed">
+  <div class="toast-dot"></div>
+  <span id="toast-msg"></span>
+  <button class="toast-undo" id="toast-undo" style="display:none">되돌리기</button>
+  <div class="toast-progress" id="toast-progress"></div>
+</div>
 
 <!-- drilldown modal -->
 <div class="modal-bg" id="drill-modal">
@@ -552,17 +560,94 @@ var defaultTargets=[
 function showLoading(){var b=document.getElementById('loading-bar');b.style.width='60%';}
 function hideLoading(){var b=document.getElementById('loading-bar');b.style.width='100%';setTimeout(function(){b.style.width='0';},300);}
 
-// ── 토스트 ──
+// ── 토스트 + Undo 히스토리 스택 ──
 var toastTimer=null;
-function showToast(msg,isErr){
+var undoStack=[]; // [{type, action, data}] — 무한 히스토리
+var UNDO_DELAY=5000;
+
+// action 타입:
+//   delete: {type:'t'|'i'|'m', id, item, table}
+//   edit:   {type:'t'|'i'|'m', id, field, oldVal}
+
+function pushUndo(action){
+  undoStack.push(action);
+  // 최대 50개 유지
+  if(undoStack.length>50)undoStack.shift();
+}
+
+function doUndo(){
+  if(!undoStack.length)return;
+  var action=undoStack.pop();
+  if(action.action==='delete'){
+    // 배열 복원
+    if(action.type==='t')targets.push(action.item);
+    if(action.type==='i')instructors.push(action.item);
+    if(action.type==='m')meetings.push(action.item);
+    targets.sort(function(a,b){return Number(a.id)-Number(b.id);});
+    instructors.sort(function(a,b){return Number(a.id)-Number(b.id);});
+    meetings.sort(function(a,b){return Number(a.id)-Number(b.id);});
+    renderAll();
+    showToast('삭제 취소됨 ('+(undoStack.length>0?undoStack.length+'개 남음':'마지막')+')',false,false);
+    // DB에 복원 (re-insert)
+    if(!String(action.id).startsWith('new')){
+      var saveFn=action.type==='t'?saveTarget:action.type==='i'?saveInstructor:saveMeeting;
+      // 새 insert로 처리 — id를 임시 변경 후 저장
+      var orig=action.item.id;
+      action.item.id='new_restore_'+Date.now();
+      saveFn(action.item).then(function(){
+        action.item.id=orig; // 저장 후 원래 id로 복구 (실제로는 새 id 부여됨)
+        renderAll();
+      });
+    }
+  } else if(action.action==='edit'){
+    var obj=getObj(action.type,action.id);
+    if(obj){
+      obj[action.field]=action.oldVal;
+      renderAll();
+      var saveFn=action.type==='t'?saveTarget:action.type==='i'?saveInstructor:saveMeeting;
+      saveFn(obj);
+      showToast('"'+action.field+'" 수정 취소됨 ('+(undoStack.length>0?undoStack.length+'개 남음':'마지막')+')',false,false);
+    }
+  }
+}
+
+function showToast(msg,isErr,withUndo){
   var t=document.getElementById('toast');
   var d=t.querySelector('.toast-dot');
+  var u=document.getElementById('toast-undo');
+  var p=document.getElementById('toast-progress');
   document.getElementById('toast-msg').textContent=msg;
   d.style.background=isErr?'var(--red)':'var(--green)';
+  u.style.display=withUndo?'block':'none';
   t.classList.add('show');
   if(toastTimer)clearTimeout(toastTimer);
-  toastTimer=setTimeout(function(){t.classList.remove('show');},2500);
+  p.style.transition='none';
+  p.style.width='100%';
+  setTimeout(function(){
+    p.style.transition='width '+(withUndo?UNDO_DELAY:2000)+'ms linear';
+    p.style.width='0%';
+  },20);
+  toastTimer=setTimeout(function(){
+    t.classList.remove('show');
+  },withUndo?UNDO_DELAY:2000);
 }
+
+// 토스트 되돌리기 버튼
+document.getElementById('toast-undo').addEventListener('click',function(){
+  doUndo();
+});
+
+// ── Ctrl+Z / Cmd+Z 키보드 단축키 ──
+document.addEventListener('keydown',function(e){
+  var isUndo=(e.ctrlKey||e.metaKey)&&e.key==='z';
+  if(!isUndo)return;
+  // input/textarea 안에서는 브라우저 기본 동작 허용
+  var tag=document.activeElement&&document.activeElement.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA')return;
+  e.preventDefault();
+  if(undoStack.length===0){showToast('더 이상 되돌릴 수 없습니다',false,false);return;}
+  doUndo();
+});
 
 // ── Supabase 설정 ──
 var SUPA_URL='https://pkkqvzbjpdcnsdvlcsir.supabase.co';
@@ -597,7 +682,8 @@ function toDB_meet(m){return{inst_id:m.instId||null,inst_name:m.instName,linked_
 function setSaveStatus(ok){
   document.getElementById('save-label').textContent=ok?'저장됨':'저장 실패';
   document.querySelector('.save-dot').style.background=ok?'#22c55e':'#ef4444';
-  if(ok){showToast('저장됐습니다');hideLoading();}else{showToast('저장 실패 — 네트워크 확인',true);hideLoading();}
+  if(ok){showToast('저장됐습니다',false,false);hideLoading();}
+  else{showToast('저장 실패 — 네트워크 확인',true,false);hideLoading();}
 }
 function setSaving(){
   document.getElementById('save-label').textContent='저장 중...';
@@ -771,14 +857,21 @@ function savePopup(){
     if(popTarget.field==='targetId')val=parseInt(val);
     if(popTarget.field==='instId'){
       var iid=parseInt(val);var inst=instructors.find(function(x){return x.id===iid;});
+      // 편집 히스토리 저장
+      pushUndo({action:'edit',type:popTarget.type,id:popTarget.id,field:'instId',oldVal:obj.instId});
       if(inst){obj.instId=iid;obj.instName=inst.name;var linked=targets.find(function(t){return t.id==inst.targetId;});obj.linkedSlogan=linked?linked.slogan:'';}
       else{obj.instId='';obj.instName='';obj.linkedSlogan='';}
-    } else {obj[popTarget.field]=val;}
+    } else {
+      // 편집 히스토리 저장 (이전 값)
+      pushUndo({action:'edit',type:popTarget.type,id:popTarget.id,field:popTarget.field,oldVal:obj[popTarget.field]});
+      obj[popTarget.field]=val;
+    }
   }
+  var savedType=popTarget.type,savedId=popTarget.id;
   closePopup();renderAll();
-  if(popTarget.type==='t'){var o=getObj('t',popTarget.id);if(o)saveTarget(o);}
-  if(popTarget.type==='i'){var o=getObj('i',popTarget.id);if(o)saveInstructor(o);}
-  if(popTarget.type==='m'){var o=getObj('m',popTarget.id);if(o)saveMeeting(o);}
+  if(savedType==='t'){var o=getObj('t',savedId);if(o)saveTarget(o);}
+  if(savedType==='i'){var o=getObj('i',savedId);if(o)saveInstructor(o);}
+  if(savedType==='m'){var o=getObj('m',savedId);if(o)saveMeeting(o);}
 }
 function closePopup(){popup.classList.remove('open');backdrop.classList.remove('open');popTarget={type:null,id:null,field:null};}
 document.getElementById('pop-save').addEventListener('click',savePopup);
@@ -1095,14 +1188,24 @@ document.addEventListener('click',function(e){
   }
   var del=e.target.closest('.del-btn');
   if(del){
-    if(!confirm('삭제할까요?'))return;
     var dt=del.dataset.delType,did=del.dataset.delId;
     var tableMap={t:'targets',i:'instructors',m:'meetings'};
+    var labelMap={t:'타겟',i:'강사',m:'미팅'};
+    var deletedItem=null;
+    if(dt==='t')deletedItem=targets.find(function(x){return String(x.id)===String(did);});
+    if(dt==='i')deletedItem=instructors.find(function(x){return String(x.id)===String(did);});
+    if(dt==='m')deletedItem=meetings.find(function(x){return String(x.id)===String(did);});
+    if(!deletedItem)return;
+    // 히스토리에 push
+    pushUndo({action:'delete',type:dt,id:did,item:Object.assign({},deletedItem),table:tableMap[dt]});
+    // UI에서 즉시 제거
     if(dt==='t')targets=targets.filter(function(x){return String(x.id)!==String(did);});
     if(dt==='i')instructors=instructors.filter(function(x){return String(x.id)!==String(did);});
     if(dt==='m')meetings=meetings.filter(function(x){return String(x.id)!==String(did);});
-    renderAll();
+    // DB 즉시 삭제
     if(!String(did).startsWith('new'))deleteFromDB(tableMap[dt],did);
+    renderAll();
+    showToast((labelMap[dt]||'항목')+' 삭제됨 — Ctrl+Z로 되돌리기',false,true);
     return;
   }
   var drill=e.target.closest('.drill-cell');
