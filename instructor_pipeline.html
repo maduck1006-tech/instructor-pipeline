@@ -15,9 +15,9 @@
   --bg-3:      #2c2c2c;
   --border:    rgba(255,255,255,.07);
   --border-2:  rgba(255,255,255,.13);
-  --text-1:    #ececec;
-  --text-2:    #9b9b9b;
-  --text-3:    #555555;
+  --text-1:    #f5f5f5;
+  --text-2:    #c4c4c4;
+  --text-3:    #888888;
   --accent:    #5e6ad2;
   --accent-2:  #7b87e0;
   --green:     #4cb97a;
@@ -38,7 +38,7 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;backgr
 .sidebar-logo p{font-size:11px;color:var(--text-3);margin-top:2px}
 .sidebar-section{padding:0 10px;margin-bottom:4px}
 .sidebar-label{font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:.8px;text-transform:uppercase;padding:8px 8px 4px}
-.nav-item{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-2);transition:all .12s;user-select:none;border:none;background:none;width:100%;text-align:left;font-family:'Pretendard',sans-serif}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:#bbb;transition:all .12s;user-select:none;border:none;background:none;width:100%;text-align:left;font-family:'Pretendard',sans-serif}
 .nav-item:hover{background:var(--bg-3);color:var(--text-1)}
 .nav-item.active{background:var(--bg-3);color:var(--text-1)}
 .nav-item .nav-icon{width:16px;height:16px;opacity:.5;flex-shrink:0}
@@ -53,7 +53,7 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;backgr
 .topbar{height:48px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;background:var(--bg)}
 .topbar-left{display:flex;align-items:center;gap:12px}
 .topbar-title{font-size:13.5px;font-weight:600;color:var(--text-1)}
-.topbar-sub{font-size:12px;color:var(--text-3)}
+.topbar-sub{font-size:12px;color:#999}
 .topbar-right{display:flex;align-items:center;gap:8px}
 .tb-btn{padding:5px 12px;border:1px solid var(--border-2);border-radius:6px;background:transparent;color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:'Pretendard',sans-serif;transition:all .12s;white-space:nowrap}
 .tb-btn:hover{background:var(--bg-3);color:var(--text-1);border-color:var(--border-2)}
@@ -72,7 +72,7 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;backgr
 .search-input:focus{border-color:var(--border-2)}
 .search-input::placeholder{color:var(--text-3)}
 .filter-pills{display:flex;gap:3px}
-.pill{padding:4px 12px;border:1px solid transparent;border-radius:5px;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:var(--text-3);font-family:'Pretendard',sans-serif;transition:all .1s}
+.pill{padding:4px 12px;border:1px solid transparent;border-radius:5px;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:#aaa;font-family:'Pretendard',sans-serif;transition:all .1s}
 .pill:hover{color:var(--text-2);background:var(--bg-3)}
 .pill.on{background:var(--bg-3);color:var(--text-1);border-color:var(--border-2)}
 .filter-sep{width:1px;height:18px;background:var(--border);flex-shrink:0}
@@ -81,17 +81,17 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;backgr
 /* ── table ── */
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:12.5px}
-th{padding:9px 16px;text-align:left;font-weight:500;font-size:11px;color:var(--text-3);border-bottom:1px solid var(--border);white-space:nowrap;letter-spacing:.3px;text-transform:uppercase;background:var(--bg)}
+th{padding:9px 16px;text-align:left;font-weight:500;font-size:11px;color:#888;border-bottom:1px solid var(--border);white-space:nowrap;letter-spacing:.3px;text-transform:uppercase;background:var(--bg)}
 td{padding:0;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,.018)}
+tr:hover td{background:rgba(255,255,255,.04)}
 .cell{padding:11px 16px;min-height:42px;display:flex;align-items:center;cursor:pointer;min-width:40px;user-select:none}
 .cell:hover{background:rgba(255,255,255,.025)}
 .cell.no-edit{cursor:default}.cell.no-edit:hover{background:transparent}
-.cell-text{font-size:12.5px;color:var(--text-1);line-height:1.5}
-.cell-muted{font-size:12px;color:var(--text-3)}
-.cell-small{font-size:12px;color:var(--text-2);line-height:1.5}
-.cell-strong{font-size:12.5px;color:var(--text-1);font-weight:500}
+.cell-text{font-size:12.5px;color:#f0f0f0;line-height:1.5}
+.cell-muted{font-size:12px;color:#aaaaaa}
+.cell-small{font-size:12px;color:#cccccc;line-height:1.5}
+.cell-strong{font-size:12.5px;color:#f5f5f5;font-weight:500}
 
 /* ── status dot badges ── */
 .badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:500;white-space:nowrap}
@@ -189,8 +189,8 @@ tr:hover .del-btn{opacity:1}
 .bar-label{width:68px;font-size:11.5px;color:var(--text-3);text-align:right;flex-shrink:0}
 .bar-track{flex:1;background:var(--bg-3);border-radius:3px;height:5px;overflow:hidden}
 .bar-fill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
-.bar-val{width:24px;font-size:11.5px;font-weight:600;text-align:right;flex-shrink:0;color:var(--text-2)}
-.dash-item{padding:9px 0;border-bottom:1px solid var(--border);font-size:12.5px;display:flex;justify-content:space-between;align-items:center;color:var(--text-2)}
+.bar-val{width:24px;font-size:11.5px;font-weight:600;text-align:right;flex-shrink:0;color:#d0d0d0}
+.dash-item{padding:9px 0;border-bottom:1px solid var(--border);font-size:12.5px;display:flex;justify-content:space-between;align-items:center;color:#d0d0d0}
 .dash-item:last-child{border-bottom:none}
 .dash-empty{color:var(--text-3);font-size:12.5px;padding:8px 0}
 .funnel-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
