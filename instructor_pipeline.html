@@ -84,17 +84,17 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;backgr
 /* ── table ── */
 .table-wrap{overflow-x:auto;flex:1}
 table{width:100%;border-collapse:collapse;font-size:12.5px}
-th{padding:9px 16px;text-align:left;font-weight:500;font-size:11px;color:#888;border-bottom:1px solid var(--border);white-space:nowrap;letter-spacing:.3px;text-transform:uppercase;background:var(--bg)}
-td{padding:0;border-bottom:1px solid var(--border);vertical-align:middle}
+th{padding:8px 12px;text-align:left;font-weight:500;font-size:11px;color:#888;border-bottom:1px solid var(--border);white-space:nowrap;letter-spacing:.3px;text-transform:uppercase;background:var(--bg)}
+td{padding:0;border-bottom:1px solid var(--border);vertical-align:middle;max-width:0}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(255,255,255,.04)}
-.cell{padding:11px 16px;min-height:42px;display:flex;align-items:center;cursor:pointer;min-width:40px;user-select:none}
+.cell{padding:8px 12px;min-height:36px;display:flex;align-items:center;cursor:pointer;min-width:40px;user-select:none;overflow:hidden}
 .cell:hover{background:rgba(255,255,255,.025)}
 .cell.no-edit{cursor:default}.cell.no-edit:hover{background:transparent}
-.cell-text{font-size:12.5px;color:#f0f0f0;line-height:1.5}
-.cell-muted{font-size:12px;color:#aaaaaa}
-.cell-small{font-size:12px;color:#cccccc;line-height:1.5}
-.cell-strong{font-size:12.5px;color:#f5f5f5;font-weight:500}
+.cell-text{font-size:12.5px;color:#f0f0f0;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cell-muted{font-size:12px;color:#aaaaaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cell-small{font-size:12px;color:#cccccc;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cell-strong{font-size:12.5px;color:#f5f5f5;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 
 /* ── status dot badges ── */
 .badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:500;white-space:nowrap}
@@ -289,6 +289,9 @@ tr:hover .del-btn{opacity:1}
 .nav-help{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--text-3);transition:all .12s;border:none;background:none;width:100%;text-align:left;font-family:Pretendard,sans-serif;margin-top:4px}
 .nav-help:hover{background:var(--bg-3);color:var(--text-2)}
 
+/* ── sns columns hidden by default ── */
+.sns-col{display:none}
+.sns-visible .sns-col{display:table-cell}
 </style>
 </head>
 <body>
@@ -413,6 +416,7 @@ tr:hover .del-btn{opacity:1}
           <span class="topbar-sub">후보 관리 및 섭외 현황</span>
         </div>
         <div class="topbar-right">
+          <button class="tb-btn" id="toggle-sns">SNS 보기</button>
           <button class="tb-btn" id="export-inst-csv">CSV</button>
           <button class="tb-btn" id="export-inst-xlsx">엑셀</button>
           <button class="tb-btn primary" id="add-inst">+ 강사 추가</button>
@@ -458,8 +462,8 @@ tr:hover .del-btn{opacity:1}
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th style="width:96px">강사명</th>
-              <th style="width:148px">연결 주제</th>
+              <th style="width:100px">강사명</th>
+              <th style="width:140px">연결 주제</th>
               <th style="width:68px">채널</th>
               <th style="width:72px">팔로워</th>
               <th style="width:150px">스토리 요약</th>
@@ -710,6 +714,28 @@ tr:hover .del-btn{opacity:1}
   </div>
 </div>
 
+
+<!-- 강사 AI 미리보기 모달 -->
+<div class="modal-bg" id="inst-ai-preview-modal">
+  <div class="modal-box" style="width:560px">
+    <button class="modal-close" onclick="document.getElementById('inst-ai-preview-modal').classList.remove('open')">✕</button>
+    <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <span style="color:var(--accent-2)">✦</span> AI 분석 결과 미리보기
+    </h3>
+    <div class="modal-sub">값을 직접 수정한 뒤 적용하세요</div>
+    <table style="width:100%;border-collapse:collapse">
+      <tbody id="inst-ai-preview-body"></tbody>
+    </table>
+    <div id="inst-ai-preview-reason" style="display:none"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
+      <button onclick="reRunInstAi()" style="padding:7px 14px;border:1px solid var(--border-2);border-radius:6px;background:none;color:var(--accent-2);font-size:12.5px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">↺ 재요청</button>
+      <div style="display:flex;gap:8px">
+        <button onclick="document.getElementById('inst-ai-preview-modal').classList.remove('open')" style="padding:7px 16px;border:1px solid var(--border-2);border-radius:6px;background:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">취소</button>
+        <button onclick="applyInstAiPreview()" style="padding:7px 20px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;font-weight:600;font-family:Pretendard,sans-serif">✦ 강사 추가하기</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- 강사 AI 분석 팝업 -->
 <div class="modal-bg" id="inst-ai-modal">
@@ -1270,7 +1296,7 @@ function renderInstructors(){
     var t=targets.find(function(t){return t.id==i.targetId;});
     return'<tr>'
       +'<td>'+txtCell(i.name,'i',i.id,'name','cell-strong')+'</td>'
-      +'<td>'+selCell(i.targetId,'i',i.id,'targetId','<span class="cell-small">'+(t?t.slogan:'연결 없음')+'</span>')+'</td>'
+      +'<td>'+selCell(i.targetId,'i',i.id,'targetId','<span class="cell-small" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:130px">'+(t?t.slogan:'연결 없음')+'</span>')+'</td>'
       +'<td>'+selCell(i.channel,'i',i.id,'channel','<span class="cell-muted">'+i.channel+'</span>')+'</td>'
       +'<td>'+txtCell(i.followers,'i',i.id,'followers','cell-muted')+'</td>'
       +'<td>'+txtCell(i.story,'i',i.id,'story','cell-small')+'</td>'
@@ -1279,15 +1305,15 @@ function renderInstructors(){
       +'<td>'+selCell(i.diff,'i',i.id,'diff','<span class="cell-muted">'+i.diff+'</span>')+'</td>'
       +'<td>'+selCell(i.contact,'i',i.id,'contact','<span class="cell-muted">'+i.contact+'</span>')+'</td>'
       +'<td>'+selCell(i.status,'i',i.id,'status','<span class="badge '+istClass(i.status)+'">'+i.status+'</span>')+'</td>'
-      +'<td>'+linkCell(i.instagram,'i',i.id,'instagram','📷')+'</td>'
-      +'<td>'+linkCell(i.youtube,'i',i.id,'youtube','▶')+'</td>'
-      +'<td>'+linkCell(i.blog,'i',i.id,'blog','✍')+'</td>'
-      +'<td>'+linkCell(i.threads,'i',i.id,'threads','@')+'</td>'
-      +'<td>'+linkCell(i.website,'i',i.id,'website','🌐')+'</td>'
-      +'<td>'+txtCell(i.email,'i',i.id,'email','cell-small')+'</td>'
-      +'<td>'+txtCell(i.phone,'i',i.id,'phone','cell-muted')+'</td>'
-      +'<td>'+txtCell(i.kakao,'i',i.id,'kakao','cell-muted')+'</td>'
       +'<td>'+txtCell(i.memo,'i',i.id,'memo','cell-small')+'</td>'
+      +'<td class="sns-col">'+linkCell(i.instagram,'i',i.id,'instagram','📷')+'</td>'
+      +'<td class="sns-col">'+linkCell(i.youtube,'i',i.id,'youtube','▶')+'</td>'
+      +'<td class="sns-col">'+linkCell(i.blog,'i',i.id,'blog','✍')+'</td>'
+      +'<td class="sns-col">'+linkCell(i.threads,'i',i.id,'threads','@')+'</td>'
+      +'<td class="sns-col">'+linkCell(i.website,'i',i.id,'website','🌐')+'</td>'
+      +'<td class="sns-col">'+txtCell(i.email,'i',i.id,'email','cell-small')+'</td>'
+      +'<td class="sns-col">'+txtCell(i.phone,'i',i.id,'phone','cell-muted')+'</td>'
+      +'<td class="sns-col">'+txtCell(i.kakao,'i',i.id,'kakao','cell-muted')+'</td>'
       +'<td><button class="del-btn" data-del-type="i" data-del-id="'+i.id+'">✕</button></td>'
     +'</tr>';
   }).join('');
@@ -1462,41 +1488,135 @@ function runInstAi(){
     if(!match)throw new Error('JSON 파싱 실패');
     var result=JSON.parse(match[0]);
     hideLoading();
-
-    // 새 강사 객체 생성
-    var ni={
-      id:'new_'+Date.now(),
-      name:name,
-      targetId:parseInt(result.bestTargetId)||( targets[0]?targets[0].id:null),
-      channel:result.channel||'유튜브',
-      followers:result.followers||'',
-      story:result.story||'',
-      sincerity:parseInt(result.sincerity)||3,
-      empathy:parseInt(result.empathy)||3,
-      diff:result.diff||'중',
-      contact:result.contact||'DM',
-      status:'미컨택',
-      memo:result.reason||'',
-      instagram:instagram||'',
-      youtube:youtube||'',
-      blog:'',threads:'',website:'',email:'',phone:'',kakao:''
-    };
-
-    instructors.push(ni);
-    renderInstructors();
-    updateNavCounts();
-    saveInstructor(ni).then(function(){renderInstructors();updateNavCounts();});
-
-    var matchedTarget=targets.find(function(t){return t.id==ni.targetId;});
-    showToast('✦ '+name+' 추가됨 — '+(matchedTarget?'"'+matchedTarget.slogan+'"에 매칭':'주제 매칭 완료'),false,false);
+    // 바로 저장 대신 미리보기 팝업
+    openInstAiPreview(name, instagram, youtube, result);
   })
   .catch(function(err){
     console.error(err);
     hideLoading();
     showToast('AI 오류: '+err.message,true,false);
-    // 오류 시 그냥 빈 강사로 추가
     addInstDirect(name,instagram,youtube);
   });
+}
+
+// ── 강사 AI 미리보기 ──
+var instAiData=null;
+
+function openInstAiPreview(name,instagram,youtube,result){
+  instAiData={name:name,instagram:instagram,youtube:youtube,result:result};
+
+  var matchedTarget=targets.find(function(t){return String(t.id)===String(result.bestTargetId);});
+  var IS='width:100%;border:1px solid var(--border-2);border-radius:5px;padding:6px 10px;font-size:12.5px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none';
+
+  // 주제 선택 드롭다운
+  var targetSel='<select class="inst-ai-field" data-key="targetId" style="'+IS+';cursor:pointer">'
+    +targets.map(function(t){
+      return'<option value="'+t.id+'"'+(String(t.id)===String(result.bestTargetId)?' selected':'')+'>'+t.slogan+'</option>';
+    }).join('')
+    +'</select>';
+
+  var chOpts=['유튜브','인스타','블로그','틱톡','오프라인','복합'];
+  var chSel='<select class="inst-ai-field" data-key="channel" style="'+IS+';cursor:pointer">'
+    +chOpts.map(function(o){return'<option'+(o===result.channel?' selected':'')+'>'+o+'</option>';}).join('')
+    +'</select>';
+
+  var diffOpts=['하','중','상'];
+  var diffSel='<select class="inst-ai-field" data-key="diff" style="'+IS+';cursor:pointer">'
+    +diffOpts.map(function(o){return'<option'+(o===result.diff?' selected':'')+'>'+o+'</option>';}).join('')
+    +'</select>';
+
+  var contOpts=['DM','이메일','지인 소개','직접 방문'];
+  var contSel='<select class="inst-ai-field" data-key="contact" style="'+IS+';cursor:pointer">'
+    +contOpts.map(function(o){return'<option'+(o===result.contact?' selected':'')+'>'+o+'</option>';}).join('')
+    +'</select>';
+
+  var sinStars='';
+  for(var i=1;i<=5;i++) sinStars+='<span class="inst-star '+(i<=parseInt(result.sincerity)?'star-on':'star-off')+'" data-val="'+i+'" data-type="sincerity">'+(i<=parseInt(result.sincerity)?'★':'☆')+'</span>';
+  var empStars='';
+  for(var i=1;i<=5;i++) empStars+='<span class="inst-star '+(i<=parseInt(result.empathy)?'star-on':'star-off')+'" data-val="'+i+'" data-type="empathy">'+(i<=parseInt(result.empathy)?'★':'☆')+'</span>';
+
+  var rows=[
+    ['강사명',     '<input type="text" class="inst-ai-field" data-key="name" value="'+name.replace(/"/g,'&quot;')+'" style="'+IS+'">'],
+    ['매칭 주제',  targetSel],
+    ['스토리',     '<input type="text" class="inst-ai-field" data-key="story" value="'+(result.story||'').replace(/"/g,'&quot;')+'" style="'+IS+'">'],
+    ['채널',       chSel],
+    ['팔로워',     '<input type="text" class="inst-ai-field" data-key="followers" value="'+(result.followers||'').replace(/"/g,'&quot;')+'" style="'+IS+'">'],
+    ['진심도',     '<div style="display:flex;gap:3px;padding:4px 0" id="inst-sin-stars">'+sinStars+'</div>'],
+    ['공감력',     '<div style="display:flex;gap:3px;padding:4px 0" id="inst-emp-stars">'+empStars+'</div>'],
+    ['섭외 난이도',diffSel],
+    ['컨택 방법',  contSel],
+    ['추천 이유',  '<input type="text" class="inst-ai-field" data-key="memo" value="'+(result.reason||'').replace(/"/g,'&quot;')+'" style="'+IS+'">'],
+  ];
+
+  var tbody=rows.map(function(r){
+    return'<tr style="border-bottom:1px solid var(--border)">'
+      +'<td style="padding:8px 10px;font-size:11.5px;color:var(--text-3);white-space:nowrap;width:90px">'+r[0]+'</td>'
+      +'<td style="padding:6px 8px">'+r[1]+'</td>'
+    +'</tr>';
+  }).join('');
+
+  document.getElementById('inst-ai-preview-body').innerHTML=tbody;
+  document.getElementById('inst-ai-preview-reason').textContent=result.reason||'';
+  document.getElementById('inst-ai-preview-modal').classList.add('open');
+
+  // 별점 클릭
+  document.querySelectorAll('#inst-ai-preview-modal .inst-star').forEach(function(star){
+    star.onclick=function(){
+      var type=this.dataset.type;
+      var val=parseInt(this.dataset.val);
+      var container=document.getElementById(type==='sincerity'?'inst-sin-stars':'inst-emp-stars');
+      container.querySelectorAll('.inst-star').forEach(function(s,i){
+        s.className='inst-star '+(i<val?'star-on':'star-off');
+        s.textContent=i<val?'★':'☆';
+      });
+    };
+  });
+}
+
+function applyInstAiPreview(){
+  if(!instAiData)return;
+  var name=instAiData.name;
+  var instagram=instAiData.instagram;
+  var youtube=instAiData.youtube;
+
+  // 입력된 값 수집
+  var vals={};
+  document.querySelectorAll('#inst-ai-preview-modal .inst-ai-field').forEach(function(el){
+    vals[el.dataset.key]=el.value;
+  });
+  // 별점 수집
+  var sinVal=document.querySelectorAll('#inst-sin-stars .star-on').length||3;
+  var empVal=document.querySelectorAll('#inst-emp-stars .star-on').length||3;
+
+  var ni={
+    id:'new_'+Date.now(),
+    name:vals.name||name,
+    targetId:parseInt(vals.targetId)||null,
+    channel:vals.channel||'유튜브',
+    followers:vals.followers||'',
+    story:vals.story||'',
+    sincerity:sinVal,
+    empathy:empVal,
+    diff:vals.diff||'중',
+    contact:vals.contact||'DM',
+    status:'미컨택',
+    memo:vals.memo||'',
+    instagram:instagram||'',
+    youtube:youtube||'',
+    blog:'',threads:'',website:'',email:'',phone:'',kakao:''
+  };
+
+  document.getElementById('inst-ai-preview-modal').classList.remove('open');
+  instAiData=null;
+  instructors.push(ni);renderInstructors();updateNavCounts();
+  saveInstructor(ni).then(function(){renderInstructors();updateNavCounts();});
+  var matchedTarget=targets.find(function(t){return t.id==ni.targetId;});
+  showToast('✦ '+ni.name+' 추가됨'+(matchedTarget?' — "'+matchedTarget.slogan+'"에 매칭':''),false,false);
+}
+
+function reRunInstAi(){
+  document.getElementById('inst-ai-preview-modal').classList.remove('open');
+  openInstAiPopup();
 }
 
 function addInstDirect(name,instagram,youtube){
@@ -1505,6 +1625,16 @@ function addInstDirect(name,instagram,youtube){
   saveInstructor(ni).then(function(){renderInstructors();updateNavCounts();});
   document.getElementById('inst-ai-modal').classList.remove('open');
 }
+
+// SNS 컬럼 토글
+var snsVisible=false;
+document.getElementById('toggle-sns').addEventListener('click',function(){
+  snsVisible=!snsVisible;
+  var table=document.querySelector('#panel-instructors table');
+  if(table)table.classList.toggle('sns-visible',snsVisible);
+  this.textContent=snsVisible?'SNS 숨기기':'SNS 보기';
+  this.style.background=snsVisible?'var(--bg-3)':'';
+});
 
 // ── 온보딩 튜토리얼 ──
 var TOTAL_STEPS=5;
