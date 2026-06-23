@@ -289,6 +289,25 @@ tr:hover .del-btn{opacity:1}
 .nav-help{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--text-3);transition:all .12s;border:none;background:none;width:100%;text-align:left;font-family:Pretendard,sans-serif;margin-top:4px}
 .nav-help:hover{background:var(--bg-3);color:var(--text-2)}
 
+
+/* ── row edit button ── */
+.row-edit-btn{padding:3px 8px;border:1px solid transparent;border-radius:4px;background:none;font-size:11px;cursor:pointer;color:var(--text-3);transition:all .1s;opacity:0;font-family:Pretendard,sans-serif}
+tr:hover .row-edit-btn{opacity:1}
+.row-edit-btn:hover{background:rgba(94,106,210,.15);color:var(--accent-2);border-color:rgba(94,106,210,.3)}
+.action-cell{display:flex;align-items:center;gap:2px;padding:0 4px}
+
+/* ── bulk edit modal ── */
+#bulk-edit-modal .modal-box{width:620px}
+.bulk-form{display:flex;flex-direction:column;gap:0}
+.bulk-row{display:grid;grid-template-columns:110px 1fr;align-items:center;border-bottom:1px solid var(--border);min-height:44px}
+.bulk-row:last-child{border-bottom:none}
+.bulk-label{font-size:11.5px;color:var(--text-3);padding:0 14px;font-weight:500;flex-shrink:0}
+.bulk-input{padding:8px 12px}
+.bulk-input input,.bulk-input select,.bulk-input textarea{width:100%;border:none;border-radius:0;padding:8px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:transparent;color:var(--text-1);outline:none;border-left:2px solid transparent;transition:border .15s}
+.bulk-input input:focus,.bulk-input select:focus,.bulk-input textarea:focus{border-left:2px solid var(--accent);background:rgba(94,106,210,.05)}
+.bulk-input textarea{resize:none;min-height:64px;line-height:1.6}
+.bulk-input select option{background:var(--bg-2)}
+
 /* ── sns columns hidden by default ── */
 .sns-col{display:none}
 .sns-visible .sns-col{display:table-cell}
@@ -400,7 +419,7 @@ tr:hover .del-btn{opacity:1}
               <th style="width:62px">우선순위</th>
               <th style="width:52px">강사</th>
               <th style="width:48px"><span class="tip">AI<span class="tip-icon">?</span><span class="tip-box">클릭하면 AI가 빈 칸을 자동완성합니다</span></span></th>
-              <th style="width:36px"></th>
+              <th style="width:68px"></th>
             </tr></thead>
             <tbody id="target-body"></tbody>
           </table>
@@ -715,6 +734,69 @@ tr:hover .del-btn{opacity:1}
 </div>
 
 
+<!-- 타겟 일괄 수정 모달 -->
+<div class="modal-bg" id="target-edit-modal">
+  <div class="modal-box" style="width:620px;max-height:88vh;overflow-y:auto">
+    <button class="modal-close" onclick="document.getElementById('target-edit-modal').classList.remove('open')">✕</button>
+    <h3 style="margin-bottom:6px">타겟 수정</h3>
+    <div class="modal-sub" id="target-edit-sub"></div>
+    <input type="hidden" id="target-edit-id">
+    <div class="bulk-form" style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:4px">
+      <div class="bulk-row"><div class="bulk-label">대분류</div><div class="bulk-input"><select id="te-cat"><option>남성</option><option>여성</option><option>직장인</option><option>자영업자</option><option>학생</option><option>시니어</option><option>부모</option><option>반려인</option></select></div></div>
+      <div class="bulk-row"><div class="bulk-label">연령/세부</div><div class="bulk-input"><input type="text" id="te-age" placeholder="예: 2030, 4060, 전연령"></div></div>
+      <div class="bulk-row"><div class="bulk-label">핵심 고통</div><div class="bulk-input"><textarea id="te-pain" placeholder="고객이 겪는 핵심 고통"></textarea></div></div>
+      <div class="bulk-row"><div class="bulk-label">주제 슬로건</div><div class="bulk-input"><input type="text" id="te-slogan" placeholder="예: 직장인 90일 루틴 메이커"></div></div>
+      <div class="bulk-row"><div class="bulk-label">기간</div><div class="bulk-input"><select id="te-period"><option>30일</option><option>60일</option><option>90일</option><option>100일</option><option>120일</option></select></div></div>
+      <div class="bulk-row"><div class="bulk-label">수치 결과</div><div class="bulk-input"><input type="text" id="te-resultNum" placeholder="예: -15kg, +8kg, 체지방 -8%"></div></div>
+      <div class="bulk-row"><div class="bulk-label">감정 결과</div><div class="bulk-input"><input type="text" id="te-resultEmo" placeholder="예: 반팔 입는 남자"></div></div>
+      <div class="bulk-row"><div class="bulk-label">시급성</div><div class="bulk-input"><select id="te-urgency"><option>매우 높음</option><option>높음</option><option>중간</option><option>낮음</option></select></div></div>
+      <div class="bulk-row"><div class="bulk-label">지불의사</div><div class="bulk-input"><select id="te-spend"><option>매우 높음</option><option>높음</option><option>중간</option><option>낮음</option></select></div></div>
+      <div class="bulk-row"><div class="bulk-label">기존 지출</div><div class="bulk-input"><select id="te-existing"><option>Y - 이미 돈 씀</option><option>N - 새 시장</option></select></div></div>
+      <div class="bulk-row"><div class="bulk-label">경쟁 포화도</div><div class="bulk-input"><select id="te-competition"><option>낮음 (블루오션)</option><option>중간</option><option>높음 (레드오션)</option></select></div></div>
+      <div class="bulk-row"><div class="bulk-label">우선순위</div><div class="bulk-input"><select id="te-prio"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button onclick="document.getElementById('target-edit-modal').classList.remove('open')" style="padding:8px 16px;border:1px solid var(--border-2);border-radius:7px;background:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">취소</button>
+      <button onclick="applyTargetEdit()" style="padding:8px 20px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;font-weight:600;font-family:Pretendard,sans-serif">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 강사 일괄 수정 모달 -->
+<div class="modal-bg" id="inst-edit-modal">
+  <div class="modal-box" style="width:620px;max-height:88vh;overflow-y:auto">
+    <button class="modal-close" onclick="document.getElementById('inst-edit-modal').classList.remove('open')">✕</button>
+    <h3 style="margin-bottom:6px">강사 수정</h3>
+    <div class="modal-sub" id="inst-edit-sub"></div>
+    <input type="hidden" id="inst-edit-id">
+    <div class="bulk-form" style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:4px">
+      <div class="bulk-row"><div class="bulk-label">강사명</div><div class="bulk-input"><input type="text" id="ie-name"></div></div>
+      <div class="bulk-row"><div class="bulk-label">연결 주제</div><div class="bulk-input"><select id="ie-targetId"></select></div></div>
+      <div class="bulk-row"><div class="bulk-label">채널</div><div class="bulk-input"><select id="ie-channel"><option>유튜브</option><option>인스타</option><option>블로그</option><option>틱톡</option><option>오프라인</option><option>복합</option></select></div></div>
+      <div class="bulk-row"><div class="bulk-label">팔로워 수</div><div class="bulk-input"><input type="text" id="ie-followers" placeholder="예: 12만"></div></div>
+      <div class="bulk-row"><div class="bulk-label">스토리 요약</div><div class="bulk-input"><textarea id="ie-story" placeholder="예: 고도비만 경험자 → 3년만에 -30kg 달성"></textarea></div></div>
+      <div class="bulk-row"><div class="bulk-label">진심도</div><div class="bulk-input"><div id="ie-sincerity-stars" style="display:flex;gap:4px;padding:8px 12px"></div></div></div>
+      <div class="bulk-row"><div class="bulk-label">공감력</div><div class="bulk-input"><div id="ie-empathy-stars" style="display:flex;gap:4px;padding:8px 12px"></div></div></div>
+      <div class="bulk-row"><div class="bulk-label">섭외 난이도</div><div class="bulk-input"><select id="ie-diff"><option>하</option><option>중</option><option>상</option></select></div></div>
+      <div class="bulk-row"><div class="bulk-label">컨택 방법</div><div class="bulk-input"><select id="ie-contact"><option>DM</option><option>이메일</option><option>지인 소개</option><option>직접 방문</option></select></div></div>
+      <div class="bulk-row"><div class="bulk-label">상태</div><div class="bulk-input"><select id="ie-status"><option>미컨택</option><option>컨택중</option><option>미팅확정</option><option>협의중</option><option>완료</option><option>불발</option></select></div></div>
+      <div class="bulk-row"><div class="bulk-label">인스타그램</div><div class="bulk-input"><input type="text" id="ie-instagram" placeholder="URL 또는 @username"></div></div>
+      <div class="bulk-row"><div class="bulk-label">유튜브</div><div class="bulk-input"><input type="text" id="ie-youtube" placeholder="youtube.com/@channel"></div></div>
+      <div class="bulk-row"><div class="bulk-label">블로그</div><div class="bulk-input"><input type="text" id="ie-blog" placeholder="블로그 URL"></div></div>
+      <div class="bulk-row"><div class="bulk-label">스레드</div><div class="bulk-input"><input type="text" id="ie-threads" placeholder="threads.net/@username"></div></div>
+      <div class="bulk-row"><div class="bulk-label">웹사이트</div><div class="bulk-input"><input type="text" id="ie-website" placeholder="https://..."></div></div>
+      <div class="bulk-row"><div class="bulk-label">이메일</div><div class="bulk-input"><input type="text" id="ie-email" placeholder="example@email.com"></div></div>
+      <div class="bulk-row"><div class="bulk-label">전화번호</div><div class="bulk-input"><input type="text" id="ie-phone" placeholder="010-0000-0000"></div></div>
+      <div class="bulk-row"><div class="bulk-label">카카오채널</div><div class="bulk-input"><input type="text" id="ie-kakao" placeholder="카카오 채널 URL 또는 ID"></div></div>
+      <div class="bulk-row"><div class="bulk-label">메모</div><div class="bulk-input"><textarea id="ie-memo"></textarea></div></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button onclick="document.getElementById('inst-edit-modal').classList.remove('open')" style="padding:8px 16px;border:1px solid var(--border-2);border-radius:7px;background:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">취소</button>
+      <button onclick="applyInstEdit()" style="padding:8px 20px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;font-weight:600;font-family:Pretendard,sans-serif">저장하기</button>
+    </div>
+  </div>
+</div>
+
 <!-- 강사 AI 미리보기 모달 -->
 <div class="modal-bg" id="inst-ai-preview-modal">
   <div class="modal-box" style="width:560px">
@@ -739,29 +821,58 @@ tr:hover .del-btn{opacity:1}
 
 <!-- 강사 AI 분석 팝업 -->
 <div class="modal-bg" id="inst-ai-modal">
-  <div class="modal-box" style="width:480px">
+  <div class="modal-box" style="width:560px;max-height:88vh;overflow-y:auto">
     <button class="modal-close" onclick="document.getElementById('inst-ai-modal').classList.remove('open')">✕</button>
     <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
       <span style="color:var(--accent-2)">✦</span> 강사 AI 분석
     </h3>
-    <div class="modal-sub">SNS 주소를 입력하면 AI가 강사 프로필을 분석하고<br>적합한 주제를 자동으로 매칭해드립니다</div>
+    <div class="modal-sub" style="margin-bottom:16px">SNS 바이오·소개글을 <strong style="color:var(--text-1)">그대로 복사해서 붙여넣으세요</strong><br>AI가 내용을 읽고 적합한 주제를 매칭합니다</div>
 
-    <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="background:rgba(94,106,210,.08);border:1px solid rgba(94,106,210,.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12.5px;color:var(--text-2);line-height:1.7">
+      💡 <strong style="color:var(--text-1)">어떻게 가져오나요?</strong><br>
+      인스타: 프로필 → 바이오 텍스트 복사<br>
+      유튜브: 채널 소개 → "더 보기" → 전체 텍스트 복사<br>
+      블로그/스레드: 자기소개 또는 대표 게시글 내용 복사
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
       <div>
         <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">강사명 <span style="color:var(--red)">*</span></label>
         <input id="inst-ai-name" type="text" placeholder="예: 김트레이너, 박코치" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
       </div>
-      <div>
-        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">인스타그램</label>
-        <input id="inst-ai-instagram" type="text" placeholder="예: instagram.com/username 또는 @username" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">인스타그램 URL</label>
+          <input id="inst-ai-instagram" type="text" placeholder="@username 또는 URL" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:8px 10px;font-size:12.5px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">유튜브 URL</label>
+          <input id="inst-ai-youtube" type="text" placeholder="youtube.com/@channel" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:8px 10px;font-size:12.5px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+        </div>
       </div>
+
       <div>
-        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">유튜브</label>
-        <input id="inst-ai-youtube" type="text" placeholder="예: youtube.com/@channel" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">
+          📋 인스타 바이오 / 채널 소개글 붙여넣기
+          <span style="color:var(--accent-2);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px"> — 여기가 핵심입니다</span>
+        </label>
+        <textarea id="inst-ai-bio" placeholder="인스타그램 바이오나 유튜브 채널 소개를 그대로 복사해서 붙여넣어 주세요.
+
+예시:
+헬스 트레이너 | 고도비만 120kg → 75kg 감량 경험자
+다이어트 식단 & 운동 루틴 전문
+유튜브 구독자 8만 | 인스타 팔로워 12만
+1:1 PT 상담 문의 → 링크트리" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:10px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none;resize:vertical;min-height:120px;line-height:1.7"></textarea>
       </div>
+
       <div>
-        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">강사 소개 / 콘텐츠 설명 <span style="color:var(--text-3);font-weight:400">(선택)</span></label>
-        <textarea id="inst-ai-desc" placeholder="예: 고도비만 경험자 출신 헬스 트레이너. 인스타 팔로워 5만. 주로 다이어트 식단과 운동 루틴 콘텐츠를 올림" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none;resize:none;min-height:80px;line-height:1.6"></textarea>
+        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">
+          📝 대표 게시글 / 콘텐츠 내용 붙여넣기
+          <span style="color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px"> (선택 — 있으면 정확도 올라감)</span>
+        </label>
+        <textarea id="inst-ai-desc" placeholder="대표적인 게시글이나 콘텐츠 설명을 붙여넣어 주세요.
+없으면 비워두셔도 됩니다." style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:10px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none;resize:vertical;min-height:80px;line-height:1.7"></textarea>
       </div>
     </div>
 
@@ -1267,7 +1378,7 @@ function renderTargets(){
       +'<td>'+selCell(t.prio,'t',t.id,'prio','<span class="badge '+prioClass(t.prio)+'">'+t.prio+'순위</span>'+prioDiff)+'</td>'
       +'<td><div class="cell no-edit drill-cell" data-target-id="'+t.id+'" style="justify-content:center;cursor:pointer">'+(cnt>0?'<span style="font-weight:700;color:var(--blue);font-size:13px;text-decoration:underline;text-underline-offset:2px">'+cnt+'명</span>':'<span style="color:var(--text-3)">—</span>')+'</div></td>'
       +'<td><div class="cell no-edit" style="justify-content:center;cursor:default"><button class="ai-fill-btn" data-tid="'+t.id+'" title="AI 자동완성" style="padding:3px 8px;border:1px solid var(--border-2);border-radius:5px;background:transparent;color:var(--accent-2);font-size:11px;font-weight:600;cursor:pointer;font-family:Pretendard,sans-serif;transition:all .1s;white-space:nowrap">✦ AI</button></div></td>'
-      +'<td><button class="del-btn" data-del-type="t" data-del-id="'+t.id+'">✕</button></td>'
+      +'<td><div class="action-cell"><button class="row-edit-btn" data-edit-type="t" data-edit-id="'+t.id+'">수정</button><button class="del-btn" data-del-type="t" data-del-id="'+t.id+'">✕</button></div></td>'
     +'</tr>';
   }).join('');
 }
@@ -1314,7 +1425,7 @@ function renderInstructors(){
       +'<td class="sns-col">'+txtCell(i.email,'i',i.id,'email','cell-small')+'</td>'
       +'<td class="sns-col">'+txtCell(i.phone,'i',i.id,'phone','cell-muted')+'</td>'
       +'<td class="sns-col">'+txtCell(i.kakao,'i',i.id,'kakao','cell-muted')+'</td>'
-      +'<td><button class="del-btn" data-del-type="i" data-del-id="'+i.id+'">✕</button></td>'
+      +'<td><div class="action-cell"><button class="row-edit-btn" data-edit-type="i" data-edit-id="'+i.id+'">수정</button><button class="del-btn" data-del-type="i" data-del-id="'+i.id+'">✕</button></div></td>'
     +'</tr>';
   }).join('');
 }
@@ -1419,6 +1530,7 @@ function openInstAiPopup(){
   document.getElementById('inst-ai-name').value='';
   document.getElementById('inst-ai-instagram').value='';
   document.getElementById('inst-ai-youtube').value='';
+  document.getElementById('inst-ai-bio').value='';
   document.getElementById('inst-ai-desc').value='';
   document.getElementById('inst-ai-modal').classList.add('open');
   setTimeout(function(){document.getElementById('inst-ai-name').focus();},100);
@@ -1428,44 +1540,46 @@ function runInstAi(){
   var name=document.getElementById('inst-ai-name').value.trim();
   var instagram=document.getElementById('inst-ai-instagram').value.trim();
   var youtube=document.getElementById('inst-ai-youtube').value.trim();
+  var bio=document.getElementById('inst-ai-bio').value.trim();
   var desc=document.getElementById('inst-ai-desc').value.trim();
 
   if(!name){document.getElementById('inst-ai-name').focus();showToast('강사명을 입력해주세요',true,false);return;}
-  if(!instagram&&!youtube&&!desc){showToast('SNS 주소 또는 소개를 하나 이상 입력해주세요',true,false);return;}
+  if(!bio&&!desc&&!instagram&&!youtube){showToast('바이오/소개글 또는 SNS 주소를 하나 이상 입력해주세요',true,false);return;}
 
   document.getElementById('inst-ai-modal').classList.remove('open');
   showLoading();
   document.getElementById('save-label').textContent='AI 분석 중...';
 
-  // 현재 등록된 타겟 목록 전달
   var targetList=targets.map(function(t,i){
-    return (i+1)+'. [ID:'+t.id+'] '+t.slogan+' ('+t.cat+' '+t.age+', '+t.urgency+' 시급성)';
+    return (i+1)+'. [ID:'+t.id+'] '+t.slogan+' ('+t.cat+' '+t.age+', 시급성:'+t.urgency+', 지불의사:'+t.spend+')';
   }).join('\n');
 
   var prompt='당신은 한국 온라인 교육 콘텐츠 강사 섭외 전문가입니다.\n\n'
-    +'아래 강사 정보를 분석해서 JSON으로 답해주세요.\n\n'
+    +'아래 강사의 실제 소개글/바이오를 분석해서 JSON으로 답해주세요.\n\n'
     +'[강사 정보]\n'
     +'이름: '+name+'\n'
     +(instagram?'인스타그램: '+instagram+'\n':'')
     +(youtube?'유튜브: '+youtube+'\n':'')
-    +(desc?'소개: '+desc+'\n':'')
+    +(bio?'\n[SNS 바이오 / 채널 소개글 — 원문]\n'+bio+'\n':'')
+    +(desc?'\n[대표 콘텐츠 내용]\n'+desc+'\n':'')
     +'\n[현재 등록된 주제 목록]\n'+targetList+'\n\n'
     +'[분석 요청]\n'
-    +'1. 강사의 전문 분야와 콘텐츠 스타일을 파악하세요\n'
-    +'2. 위 주제 목록 중 가장 적합한 주제 ID를 선택하세요\n'
-    +'3. 강사의 스토리를 한 줄로 요약하세요\n'
-    +'4. 채널 종류, 섭외 난이도, 진심도, 공감력을 추정하세요\n\n'
+    +'1. 소개글에서 강사의 전문 분야, 경험, 타겟 고객을 파악하세요\n'
+    +'2. 팔로워 수가 소개글에 언급되면 정확히 추출하세요\n'
+    +'3. 주제 목록 중 이 강사에게 가장 적합한 주제 ID를 선택하세요\n'
+    +'4. 강사의 핵심 스토리를 한 줄로 요약하세요 (본인 경험 있으면 꼭 포함)\n'
+    +'5. 진심도(문제에 얼마나 몰입하는지)와 공감력(직접 경험 여부)을 소개글 기반으로 평가하세요\n\n'
     +'[출력 형식 - JSON만 출력]\n'
     +'{\n'
-    +'"bestTargetId": "가장 적합한 주제의 ID (숫자)",\n'
-    +'"story": "강사 스토리 한 줄 요약 (예: 고도비만 경험자 출신 → 3년만에 -30kg 달성)",\n'
+    +'"bestTargetId": "가장 적합한 주제 ID (숫자만)",\n'
+    +'"story": "강사 핵심 스토리 한 줄 (본인 경험 기반으로 구체적으로)",\n'
     +'"channel": "유튜브 또는 인스타 또는 블로그 또는 틱톡 또는 오프라인 또는 복합",\n'
-    +'"followers": "팔로워 수 추정 (SNS 주소로 유추, 모르면 빈 문자열)",\n'
-    +'"sincerity": "1~5 숫자 (문제에 얼마나 진심인지)",\n'
-    +'"empathy": "1~5 숫자 (수강생과 공감할 수 있는지)",\n'
-    +'"diff": "하 또는 중 또는 상 (섭외 난이도)",\n'
+    +'"followers": "소개글에서 언급된 팔로워 수 (없으면 빈 문자열)",\n'
+    +'"sincerity": "1~5 숫자 (소개글에서 문제에 얼마나 진심인지 판단)",\n'
+    +'"empathy": "1~5 숫자 (직접 경험 있으면 5, 간접 경험 4, 전문가만 3)",\n'
+    +'"diff": "하 또는 중 또는 상 (팔로워 수 기반 섭외 난이도)",\n'
     +'"contact": "DM 또는 이메일 또는 지인 소개 또는 직접 방문",\n'
-    +'"reason": "이 주제를 추천하는 이유 한 줄"\n'
+    +'"reason": "이 주제를 추천하는 이유 (소개글 근거 포함하여 구체적으로)"\n'
     +'}';
 
   fetch(GROQ_URL,{
@@ -1624,6 +1738,7 @@ function addInstDirect(name,instagram,youtube){
   instructors.push(ni);renderInstructors();updateNavCounts();
   saveInstructor(ni).then(function(){renderInstructors();updateNavCounts();});
   document.getElementById('inst-ai-modal').classList.remove('open');
+  showToast('강사 추가됨',false,false);
 }
 
 // SNS 컬럼 토글
@@ -1697,6 +1812,134 @@ document.getElementById('help-close').addEventListener('click',function(){
 if(!localStorage.getItem('pip_onboarded')){
   setTimeout(function(){initOnboard();startOnboard();},600);
 }
+
+// ── 타겟 일괄 수정 ──
+function openTargetEdit(id){
+  var t=targets.find(function(x){return String(x.id)===String(id);});
+  if(!t)return;
+  document.getElementById('target-edit-id').value=id;
+  document.getElementById('target-edit-sub').textContent=t.slogan||'';
+  document.getElementById('te-cat').value=t.cat||'남성';
+  document.getElementById('te-age').value=t.age||'';
+  document.getElementById('te-pain').value=t.pain||'';
+  document.getElementById('te-slogan').value=t.slogan||'';
+  document.getElementById('te-period').value=t.period||'90일';
+  document.getElementById('te-resultNum').value=t.resultNum||'';
+  document.getElementById('te-resultEmo').value=t.resultEmo||'';
+  document.getElementById('te-urgency').value=t.urgency||'높음';
+  document.getElementById('te-spend').value=t.spend||'중간';
+  document.getElementById('te-existing').value=t.existing||'N - 새 시장';
+  document.getElementById('te-competition').value=t.competition||'중간';
+  document.getElementById('te-prio').value=t.prio||'3';
+  document.getElementById('target-edit-modal').classList.add('open');
+}
+function applyTargetEdit(){
+  var id=document.getElementById('target-edit-id').value;
+  var t=targets.find(function(x){return String(x.id)===String(id);});
+  if(!t)return;
+  pushUndo({action:'edit',type:'t',id:t.id,field:'_bulk',oldVal:Object.assign({},t)});
+  t.cat=document.getElementById('te-cat').value;
+  t.age=document.getElementById('te-age').value;
+  t.pain=document.getElementById('te-pain').value;
+  t.slogan=document.getElementById('te-slogan').value;
+  t.period=document.getElementById('te-period').value;
+  t.resultNum=document.getElementById('te-resultNum').value;
+  t.resultEmo=document.getElementById('te-resultEmo').value;
+  t.urgency=document.getElementById('te-urgency').value;
+  t.spend=document.getElementById('te-spend').value;
+  t.existing=document.getElementById('te-existing').value;
+  t.competition=document.getElementById('te-competition').value;
+  t.prio=document.getElementById('te-prio').value;
+  document.getElementById('target-edit-modal').classList.remove('open');
+  renderTargets();
+  saveTarget(t);
+}
+
+// ── 강사 일괄 수정 ──
+function openInstEdit(id){
+  var i=instructors.find(function(x){return String(x.id)===String(id);});
+  if(!i)return;
+  document.getElementById('inst-edit-id').value=id;
+  document.getElementById('inst-edit-sub').textContent=i.name||'';
+  // 주제 드롭다운 채우기
+  var tSel=document.getElementById('ie-targetId');
+  tSel.innerHTML=targets.map(function(t){
+    return'<option value="'+t.id+'"'+(t.id==i.targetId?' selected':'')+'>'+t.slogan+'</option>';
+  }).join('');
+  document.getElementById('ie-name').value=i.name||'';
+  document.getElementById('ie-channel').value=i.channel||'유튜브';
+  document.getElementById('ie-followers').value=i.followers||'';
+  document.getElementById('ie-story').value=i.story||'';
+  document.getElementById('ie-diff').value=i.diff||'중';
+  document.getElementById('ie-contact').value=i.contact||'DM';
+  document.getElementById('ie-status').value=i.status||'미컨택';
+  document.getElementById('ie-instagram').value=i.instagram||'';
+  document.getElementById('ie-youtube').value=i.youtube||'';
+  document.getElementById('ie-blog').value=i.blog||'';
+  document.getElementById('ie-threads').value=i.threads||'';
+  document.getElementById('ie-website').value=i.website||'';
+  document.getElementById('ie-email').value=i.email||'';
+  document.getElementById('ie-phone').value=i.phone||'';
+  document.getElementById('ie-kakao').value=i.kakao||'';
+  document.getElementById('ie-memo').value=i.memo||'';
+  // 별점
+  renderEditStars('ie-sincerity-stars','sincerity',Number(i.sincerity)||3);
+  renderEditStars('ie-empathy-stars','empathy',Number(i.empathy)||3);
+  document.getElementById('inst-edit-modal').classList.add('open');
+}
+function renderEditStars(containerId,type,val){
+  var c=document.getElementById(containerId);
+  c.innerHTML='';
+  for(var k=1;k<=5;k++){
+    var s=document.createElement('span');
+    s.style.fontSize='20px';s.style.cursor='pointer';
+    s.className=k<=val?'star-on':'star-off';
+    s.textContent=k<=val?'★':'☆';
+    s.dataset.val=k;s.dataset.type=type;
+    s.onclick=function(){
+      var v=parseInt(this.dataset.val);
+      var t=this.dataset.type;
+      renderEditStars(t==='sincerity'?'ie-sincerity-stars':'ie-empathy-stars',t,v);
+    };
+    c.appendChild(s);
+  }
+}
+function applyInstEdit(){
+  var id=document.getElementById('inst-edit-id').value;
+  var i=instructors.find(function(x){return String(x.id)===String(id);});
+  if(!i)return;
+  pushUndo({action:'edit',type:'i',id:i.id,field:'_bulk',oldVal:Object.assign({},i)});
+  i.name=document.getElementById('ie-name').value;
+  i.targetId=parseInt(document.getElementById('ie-targetId').value)||null;
+  i.channel=document.getElementById('ie-channel').value;
+  i.followers=document.getElementById('ie-followers').value;
+  i.story=document.getElementById('ie-story').value;
+  i.diff=document.getElementById('ie-diff').value;
+  i.contact=document.getElementById('ie-contact').value;
+  i.status=document.getElementById('ie-status').value;
+  i.instagram=document.getElementById('ie-instagram').value;
+  i.youtube=document.getElementById('ie-youtube').value;
+  i.blog=document.getElementById('ie-blog').value;
+  i.threads=document.getElementById('ie-threads').value;
+  i.website=document.getElementById('ie-website').value;
+  i.email=document.getElementById('ie-email').value;
+  i.phone=document.getElementById('ie-phone').value;
+  i.kakao=document.getElementById('ie-kakao').value;
+  i.memo=document.getElementById('ie-memo').value;
+  i.sincerity=document.querySelectorAll('#ie-sincerity-stars .star-on').length||3;
+  i.empathy=document.querySelectorAll('#ie-empathy-stars .star-on').length||3;
+  document.getElementById('inst-edit-modal').classList.remove('open');
+  renderInstructors();
+  saveInstructor(i);
+  showToast('✦ '+i.name+' 수정됐습니다',false,false);
+}
+
+// 수정 모달 닫기 이벤트
+document.getElementById('target-edit-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+document.getElementById('inst-edit-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+// Enter 키 저장
+document.getElementById('target-edit-modal').addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.tagName!=='TEXTAREA')applyTargetEdit();if(e.key==='Escape')this.classList.remove('open');});
+document.getElementById('inst-edit-modal').addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.tagName!=='TEXTAREA')applyInstEdit();if(e.key==='Escape')this.classList.remove('open');});
 
 // ── 강사 AI 팝업 이벤트 ──
 var GROQ_KEY='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';
