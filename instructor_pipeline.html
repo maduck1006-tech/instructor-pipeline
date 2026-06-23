@@ -347,6 +347,8 @@ tr:hover .del-btn{opacity:1}
           <span class="topbar-sub">후보 관리 및 섭외 현황</span>
         </div>
         <div class="topbar-right">
+          <button class="tb-btn" id="export-inst-csv">CSV</button>
+          <button class="tb-btn" id="export-inst-xlsx">엑셀</button>
           <button class="tb-btn primary" id="add-inst">+ 강사 추가</button>
         </div>
       </div>
@@ -1096,7 +1098,7 @@ function renderMeetings(){
   if(!rows.length){body.innerHTML='<tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">📅</div><div class="empty-state-title">미팅 로그가 없습니다</div><div class="empty-state-sub">강사와의 미팅 내용을 기록하세요</div></div></td></tr>';return;}
   body.innerHTML=rows.map(function(m){
     var mstBadge=m.status==='완료'?'ist-3':m.status==='보류'?'ist-4':'ist-1';
-    var instDisp=m.instName?'<span style="font-weight:700;color:#1c1917">'+m.instName+'</span>':'<span style="color:#bbb;font-size:12px">강사 선택 →</span>';
+    var instDisp=m.instName?'<span style="font-weight:600;color:var(--text-1)">'+m.instName+'</span>':'<span style="color:var(--text-3);font-size:12px">강사 선택 →</span>';
     var chipDisp=m.linkedSlogan?'<span class="topic-chip">'+m.linkedSlogan+'</span>':'<span style="color:#ddd;font-size:11px">—</span>';
     return'<tr>'
       +'<td><div class="cell" data-type="m" data-id="'+m.id+'" data-field="instId" style="gap:6px">'+instDisp+'</div></td>'
@@ -1430,7 +1432,28 @@ document.getElementById('drill-close').addEventListener('click',function(){docum
 document.getElementById('drill-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 
 // ── export ──
-document.getElementById('export-csv').addEventListener('click',function(){
+document.getElementById('export-inst-csv').addEventListener('click',function(){
+  var rows=[['강사명','연결주제','채널','팔로워','스토리','진심도','공감력','난이도','컨택','상태','메모','인스타','유튜브','블로그','스레드','웹사이트','이메일','전화번호','카카오채널']];
+  instructors.forEach(function(i){
+    var t=targets.find(function(t){return t.id==i.targetId;});
+    rows.push([i.name,t?t.slogan:'',i.channel,i.followers,i.story,i.sincerity,i.empathy,i.diff,i.contact,i.status,i.memo,i.instagram,i.youtube,i.blog,i.threads,i.website,i.email,i.phone,i.kakao]);
+  });
+  var csv=rows.map(function(r){return r.map(function(c){return'"'+(c||'').toString().replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='강사DB.csv';a.click();
+});
+
+document.getElementById('export-inst-xlsx').addEventListener('click',function(){
+  if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중입니다. 잠시 후 다시 시도해 주세요.');return;}
+  var wb=XLSX.utils.book_new();
+  var iData=[['강사명','연결주제','채널','팔로워','스토리','진심도','공감력','난이도','컨택','상태','메모','인스타','유튜브','블로그','스레드','웹사이트','이메일','전화번호','카카오채널']];
+  instructors.forEach(function(i){
+    var t=targets.find(function(t){return t.id==i.targetId;});
+    iData.push([i.name,t?t.slogan:'',i.channel,i.followers,i.story,i.sincerity,i.empathy,i.diff,i.contact,i.status,i.memo,i.instagram,i.youtube,i.blog,i.threads,i.website,i.email,i.phone,i.kakao]);
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(iData),'강사DB');
+  XLSX.writeFile(wb,'강사DB.xlsx');
+});
   var rows=[['ID','대분류','연령','핵심고통','주제슬로건','기간','수치결과','감정결과','시급성','지불의사','기존지출','경쟁포화','점수','우선순위']];
   targets.forEach(function(t){rows.push([t.id,t.cat,t.age,t.pain,t.slogan,t.period,t.resultNum,t.resultEmo,t.urgency,t.spend,t.existing,t.competition,calcScore(t),t.prio]);});
   var csv=rows.map(function(r){return r.map(function(c){return'"'+(c||'').toString().replace(/"/g,'""')+'"';}).join(',');}).join('\n');
