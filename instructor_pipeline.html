@@ -1056,9 +1056,9 @@ function renderDashboard(){
 function sc(l,v,sub){return'<div class="stat-card"><div class="stat-label">'+l+'</div><div class="stat-val">'+v+'</div>'+(sub?'<div class="stat-sub">'+sub+'</div>':'')+'</div>';}
 function barRow(l,n,max,color){return'<div class="bar-row"><span class="bar-label">'+l+'</span><div class="bar-track"><div class="bar-fill" style="width:'+(max?Math.round(n/max*100):0)+'%;background:'+color+'"></div></div><span class="bar-val">'+n+'</span></div>';}
 
-// ── Gemini AI 자동완성 ──
-var GEMINI_KEY='AIzaSyAQ-Ab8RN6KXDhjzP6RYVAD3vjQgtHt2zg14zC2eFa4Zxox02ercDg';
-var GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+GEMINI_KEY;
+// ── Groq AI 자동완성 ──
+var GROQ_KEY='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';
+var GROQ_URL='https://api.groq.com/openai/v1/chat/completions';
 
 function aiFillTarget(tid){
   var t=targets.find(function(x){return x.id===tid;});
@@ -1091,21 +1091,28 @@ function aiFillTarget(tid){
     +'"period": "30일 또는 60일 또는 90일 또는 100일 또는 120일"\n'
     +'}';
 
-  fetch(GEMINI_URL,{
+  fetch(GROQ_URL,{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer '+GROQ_KEY
+    },
     body:JSON.stringify({
-      contents:[{parts:[{text:prompt}]}],
-      generationConfig:{temperature:0.7,maxOutputTokens:512}
+      model:'llama-3.3-70b-versatile',
+      messages:[
+        {role:'system',content:'당신은 한국 온라인 교육 콘텐츠 기획 전문가입니다. 반드시 JSON만 출력하고 다른 텍스트는 절대 포함하지 마세요.'},
+        {role:'user',content:prompt}
+      ],
+      temperature:0.7,
+      max_tokens:512
     })
   })
   .then(function(r){return r.json();})
   .then(function(data){
-    var text=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0].text;
+    var text=data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
     if(!text)throw new Error('응답 없음');
-    // JSON 추출
     var match=text.match(/\{[\s\S]*\}/);
-    if(!match)throw new Error('JSON 파싱 실패');
+    if(!match)throw new Error('JSON 파싱 실패: '+text.slice(0,100));
     var result=JSON.parse(match[0]);
     // 값 채우기 (비어있는 칸만 채움, 이미 있는 건 덮어쓰지 않음)
     var filled=[];
