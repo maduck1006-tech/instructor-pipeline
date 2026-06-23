@@ -499,6 +499,71 @@ tr:hover .del-btn{opacity:1}
   <div class="toast-progress" id="toast-progress"></div>
 </div>
 
+<!-- AI 입력 팝업 -->
+<div class="modal-bg" id="ai-input-modal">
+  <div class="modal-box" style="width:420px">
+    <button class="modal-close" onclick="document.getElementById('ai-input-modal').classList.remove('open')">✕</button>
+    <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <span style="color:var(--accent-2)">✦</span> AI 자동완성
+    </h3>
+    <div class="modal-sub">타겟 정보를 입력하면 AI가 나머지를 채워드립니다</div>
+    <input type="hidden" id="ai-in-tid">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">대분류</label>
+        <select id="ai-in-cat" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+          <option>남성</option><option>여성</option><option>직장인</option>
+          <option>자영업자</option><option>학생</option><option>시니어</option>
+          <option>부모</option><option>반려인</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">연령 / 세부 타겟</label>
+        <input id="ai-in-age" type="text" placeholder="예: 2030, 4060, 전연령" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">핵심 고통 <span style="color:var(--red)">*</span></label>
+        <textarea id="ai-in-pain" placeholder="예: 퇴근 후 체력이 없어서 운동을 시작조차 못 함&#10;예: 가슴 여성형 발달로 외출이 두려움" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none;resize:none;min-height:80px;line-height:1.6"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button onclick="document.getElementById('ai-input-modal').classList.remove('open')" style="padding:8px 16px;border:1px solid var(--border-2);border-radius:7px;background:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">취소</button>
+      <button onclick="runAiFromInput()" style="padding:8px 20px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;font-weight:600;font-family:Pretendard,sans-serif">✦ AI 분석 시작</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI 미리보기 모달 -->
+<div class="modal-bg" id="ai-preview-modal">
+  <div class="modal-box" style="width:580px">
+    <button class="modal-close" id="ai-preview-close">✕</button>
+    <h3 style="display:flex;align-items:center;gap:8px">
+      <span style="color:var(--accent-2)">✦</span> AI 자동완성 미리보기
+    </h3>
+    <div class="modal-sub">적용할 항목을 선택하세요. 체크된 항목만 반영됩니다.</div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="padding:6px 12px;font-size:11px;color:var(--text-3);text-align:left;font-weight:600;letter-spacing:.3px;text-transform:uppercase">항목</th>
+          <th style="padding:6px 12px;font-size:11px;color:var(--text-3);text-align:left;font-weight:600;letter-spacing:.3px;text-transform:uppercase">현재 값</th>
+          <th style="width:20px"></th>
+          <th style="padding:6px 12px;font-size:11px;color:var(--accent-2);text-align:left;font-weight:600;letter-spacing:.3px;text-transform:uppercase">AI 추천</th>
+          <th style="padding:6px 8px;font-size:11px;color:var(--text-3);text-align:center;font-weight:600">적용</th>
+        </tr>
+      </thead>
+      <tbody id="ai-preview-body"></tbody>
+    </table>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
+      <button onclick="document.querySelectorAll('.ai-check').forEach(function(c){c.checked=true})" style="padding:5px 12px;border:1px solid var(--border-2);border-radius:6px;background:none;color:var(--text-2);font-size:12px;cursor:pointer;font-family:Pretendard,sans-serif">전체 선택</button>
+      <div style="display:flex;gap:8px">
+        <button onclick="reRequestAi()" style="padding:7px 14px;border:1px solid var(--border-2);border-radius:6px;background:none;color:var(--accent-2);font-size:12.5px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">↺ 재요청</button>
+        <button id="ai-preview-cancel" style="padding:7px 16px;border:1px solid var(--border-2);border-radius:6px;background:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">취소</button>
+        <button id="ai-preview-apply" style="padding:7px 20px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;font-weight:600;font-family:Pretendard,sans-serif">✦ 적용하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- drilldown modal -->
 <div class="modal-bg" id="drill-modal">
   <div class="modal-box">
@@ -1063,21 +1128,57 @@ var GROQ_URL='https://api.groq.com/openai/v1/chat/completions';
 function aiFillTarget(tid){
   var t=targets.find(function(x){return x.id===tid;});
   if(!t)return;
-  // 입력값 확인
-  if(!t.cat&&!t.pain&&!t.age){showToast('대분류, 연령, 핵심 고통 중 하나 이상 입력해주세요',true,false);return;}
+  // 먼저 입력 팝업 열기
+  openAiInputPopup(tid);
+}
 
-  // 버튼 로딩 상태
+// ── AI 입력 팝업 (API 호출 전) ──
+function openAiInputPopup(tid){
+  var t=targets.find(function(x){return x.id===tid;});
+  if(!t)return;
+
+  var modal=document.getElementById('ai-input-modal');
+  // 기존 값 미리 채워두기
+  document.getElementById('ai-in-cat').value=t.cat||'남성';
+  document.getElementById('ai-in-age').value=t.age||'';
+  document.getElementById('ai-in-pain').value=t.pain||'';
+  document.getElementById('ai-in-tid').value=tid;
+  modal.classList.add('open');
+  document.getElementById('ai-in-pain').focus();
+}
+
+function runAiFromInput(){
+  var tid=document.getElementById('ai-in-tid').value;
+  var cat=document.getElementById('ai-in-cat').value.trim();
+  var age=document.getElementById('ai-in-age').value.trim();
+  var pain=document.getElementById('ai-in-pain').value.trim();
+
+  if(!cat&&!age&&!pain){
+    document.getElementById('ai-in-pain').focus();
+    return;
+  }
+
+  var t=targets.find(function(x){return String(x.id)===String(tid);});
+  if(!t)return;
+
+  // 입력값을 타겟에 임시 반영
+  if(cat)t.cat=cat;
+  if(age)t.age=age;
+  if(pain)t.pain=pain;
+
+  document.getElementById('ai-input-modal').classList.remove('open');
+
+  // 버튼 로딩
   var btn=document.querySelector('.ai-fill-btn[data-tid="'+tid+'"]');
-  if(btn){btn.textContent='...';btn.disabled=true;}
+  if(btn){btn.textContent='···';btn.disabled=true;}
   showLoading();
 
   var prompt='당신은 한국 온라인 교육 콘텐츠 기획 전문가입니다.\n\n'
     +'아래 타겟 정보를 바탕으로 나머지 항목을 채워주세요.\n\n'
     +'[입력 정보]\n'
-    +'대분류: '+(t.cat||'미입력')+'\n'
-    +'연령/세부: '+(t.age||'미입력')+'\n'
-    +'핵심 고통: '+(t.pain||'미입력')+'\n'
-    +'기존 슬로건: '+(t.slogan&&t.slogan!=='새 주제'?t.slogan:'없음')+'\n\n'
+    +'대분류: '+cat+'\n'
+    +'연령/세부: '+age+'\n'
+    +'핵심 고통: '+pain+'\n\n'
     +'[출력 형식 - 반드시 아래 JSON만 출력, 다른 텍스트 없이]\n'
     +'{\n'
     +'"slogan": "타겟+문제+기간+결과 형태의 매력적인 주제 슬로건 (예: 직장인 90일 루틴 메이커)",\n'
@@ -1114,21 +1215,9 @@ function aiFillTarget(tid){
     var match=text.match(/\{[\s\S]*\}/);
     if(!match)throw new Error('JSON 파싱 실패: '+text.slice(0,100));
     var result=JSON.parse(match[0]);
-    // 값 채우기 (비어있는 칸만 채움, 이미 있는 건 덮어쓰지 않음)
-    var filled=[];
-    if(result.slogan&&(!t.slogan||t.slogan==='새 주제')){t.slogan=result.slogan;filled.push('슬로건');}
-    if(result.resultNum&&!t.resultNum){t.resultNum=result.resultNum;filled.push('수치결과');}
-    if(result.resultEmo&&!t.resultEmo){t.resultEmo=result.resultEmo;filled.push('감정결과');}
-    if(result.urgency&&!t.urgency){t.urgency=result.urgency;filled.push('시급성');}
-    if(result.spend&&!t.spend){t.spend=result.spend;filled.push('지불의사');}
-    if(result.existing&&!t.existing){t.existing=result.existing;filled.push('기존지출');}
-    if(result.competition&&!t.competition){t.competition=result.competition;filled.push('경쟁포화');}
-    if(result.prio&&!t.prio){t.prio=result.prio;filled.push('우선순위');}
-    if(result.period&&(!t.period||t.period==='90일')){t.period=result.period;}
     hideLoading();
-    renderTargets();
-    saveTarget(t);
-    showToast('✦ AI가 '+filled.join(', ')+' 자동완성했습니다',false,false);
+    if(btn){btn.textContent='✦ AI';btn.disabled=false;}
+    openAiPreview(t,result);
   })
   .catch(function(err){
     console.error(err);
@@ -1137,6 +1226,97 @@ function aiFillTarget(tid){
     showToast('AI 오류: '+err.message,true,false);
   });
 }
+
+// ── AI 미리보기 팝업 ──
+var aiPreviewTarget=null;
+var aiPreviewResult=null;
+
+function openAiPreview(t,result){
+  aiPreviewTarget=t;
+  aiPreviewResult=result;
+
+  var selectOpts={
+    urgency:   ['매우 높음','높음','중간','낮음'],
+    spend:     ['매우 높음','높음','중간','낮음'],
+    existing:  ['Y - 이미 돈 씀','N - 새 시장'],
+    competition:['낮음 (블루오션)','중간','높음 (레드오션)'],
+    prio:      ['1','2','3','4','5'],
+    period:    ['30일','60일','90일','100일','120일'],
+  };
+
+  var fields=[
+    {key:'slogan',   label:'주제 슬로건', cur:t.slogan==='새 주제'?'':t.slogan},
+    {key:'resultNum',label:'수치 결과',   cur:t.resultNum},
+    {key:'resultEmo',label:'감정 결과',   cur:t.resultEmo},
+    {key:'urgency',  label:'시급성',      cur:t.urgency},
+    {key:'spend',    label:'지불의사',    cur:t.spend},
+    {key:'existing', label:'기존 지출',   cur:t.existing},
+    {key:'competition',label:'경쟁포화',  cur:t.competition},
+    {key:'prio',     label:'우선순위',    cur:t.prio},
+    {key:'period',   label:'기간',        cur:t.period},
+  ];
+
+  var IS='width:100%;border:1px solid var(--border-2);border-radius:5px;padding:5px 8px;font-size:12px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none';
+
+  var rows=fields.map(function(f){
+    var ai=result[f.key]||'';
+    var cur=f.cur||'';
+    var changed=!!ai&&ai!==cur;
+    var inputHtml='';
+    if(selectOpts[f.key]){
+      inputHtml='<select class="ai-edit" data-key="'+f.key+'" style="'+IS+';cursor:pointer">'
+        +selectOpts[f.key].map(function(o){return'<option value="'+o+'"'+(o===ai?' selected':'')+'>'+o+'</option>';}).join('')
+        +'</select>';
+    } else {
+      inputHtml='<input type="text" class="ai-edit" data-key="'+f.key+'" value="'+ai.replace(/"/g,'&quot;')+'" style="'+IS+'">';
+    }
+    return '<tr style="border-bottom:1px solid var(--border)">'
+      +'<td style="padding:8px 10px;font-size:11.5px;color:var(--text-3);white-space:nowrap;width:80px">'+f.label+'</td>'
+      +'<td style="padding:8px 10px;font-size:12px;color:var(--text-3);width:130px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+cur+'">'+( cur||'—')+'</td>'
+      +'<td style="padding:4px 4px;font-size:11px;color:var(--text-3);width:16px">→</td>'
+      +'<td style="padding:4px 8px;min-width:160px">'+inputHtml+'</td>'
+      +'<td style="padding:4px 8px;text-align:center;width:36px">'
+        +'<input type="checkbox" class="ai-check" data-key="'+f.key+'" '+(changed?'checked':'')+' style="accent-color:var(--accent);cursor:pointer;width:14px;height:14px">'
+      +'</td>'
+    +'</tr>';
+  }).join('');
+
+  document.getElementById('ai-preview-body').innerHTML=rows;
+  document.getElementById('ai-preview-modal').classList.add('open');
+}
+
+function applyAiPreview(){
+  var t=aiPreviewTarget;
+  if(!t){closeAiPreview();return;}
+  var filled=[];
+  var labelMap={slogan:'슬로건',resultNum:'수치결과',resultEmo:'감정결과',urgency:'시급성',spend:'지불의사',existing:'기존지출',competition:'경쟁포화',prio:'우선순위',period:'기간'};
+  document.querySelectorAll('#ai-preview-body .ai-check').forEach(function(cb){
+    if(!cb.checked)return;
+    var key=cb.dataset.key;
+    var inp=document.querySelector('#ai-preview-body .ai-edit[data-key="'+key+'"]');
+    var val=inp?inp.value.trim():'';
+    if(!val)return;
+    t[key]=val;
+    filled.push(labelMap[key]||key);
+  });
+  closeAiPreview();
+  renderTargets();
+  saveTarget(t);
+  showToast('✦ '+filled.join(', ')+' 적용됐습니다',false,false);
+}
+
+function reRequestAi(){
+  var t=aiPreviewTarget;
+  if(!t)return;
+  closeAiPreview();
+  openAiInputPopup(t.id);
+}
+
+function closeAiPreview(){
+  document.getElementById('ai-preview-modal').classList.remove('open');
+  aiPreviewTarget=null;aiPreviewResult=null;
+}
+
 
 // AI 버튼 클릭 이벤트
 document.addEventListener('click',function(e){
@@ -1214,6 +1394,13 @@ function openDrill(tid){
     :'<div class="modal-empty">연결된 강사가 없습니다</div>';
   document.getElementById('drill-modal').classList.add('open');
 }
+document.getElementById('ai-preview-close').addEventListener('click',closeAiPreview);
+document.getElementById('ai-preview-cancel').addEventListener('click',closeAiPreview);
+document.getElementById('ai-preview-apply').addEventListener('click',applyAiPreview);
+document.getElementById('ai-preview-modal').addEventListener('click',function(e){if(e.target===this)closeAiPreview();});
+document.getElementById('ai-input-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+document.getElementById('ai-in-pain').addEventListener('keydown',function(e){if(e.key==='Enter'&&e.metaKey)runAiFromInput();});
+
 document.getElementById('drill-close').addEventListener('click',function(){document.getElementById('drill-modal').classList.remove('open');});
 document.getElementById('drill-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 
