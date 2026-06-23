@@ -391,16 +391,24 @@ tr:hover .del-btn{opacity:1}
           <table>
             <thead><tr>
               <th style="width:96px">강사명</th>
-              <th style="width:158px">연결 주제</th>
+              <th style="width:148px">연결 주제</th>
               <th style="width:68px">채널</th>
               <th style="width:72px">팔로워</th>
-              <th style="width:168px">스토리 요약</th>
+              <th style="width:150px">스토리 요약</th>
               <th style="width:90px">진심도</th>
               <th style="width:90px">공감력</th>
               <th style="width:56px">난이도</th>
               <th style="width:68px">컨택</th>
               <th style="width:80px">상태</th>
-              <th style="width:128px">메모</th>
+              <th style="width:110px">인스타</th>
+              <th style="width:110px">유튜브</th>
+              <th style="width:90px">블로그</th>
+              <th style="width:90px">스레드</th>
+              <th style="width:100px">웹사이트</th>
+              <th style="width:130px">이메일</th>
+              <th style="width:110px">전화번호</th>
+              <th style="width:110px">카카오채널</th>
+              <th style="width:110px">메모</th>
               <th style="width:36px"></th>
             </tr></thead>
             <tbody id="inst-body"></tbody>
@@ -607,6 +615,8 @@ var FIELD_LABELS={
   existing:'기존 지출 여부',competition:'경쟁 포화도',prio:'우선순위',
   name:'강사명',targetId:'연결 주제',channel:'채널',followers:'팔로워 수',
   story:'스토리 한 줄 요약',diff:'섭외 난이도',contact:'컨택 방법',status:'상태',memo:'메모',
+  instagram:'인스타그램',youtube:'유튜브 채널',blog:'블로그',threads:'스레드',
+  website:'웹사이트',email:'이메일',phone:'전화번호',kakao:'카카오채널',
   instId:'강사 선택',date:'미팅 일자',topic:'논의 주제',reaction:'강사 반응',
   conditions:'조건 / 요구사항',next:'다음 액션',mstatus:'상태'
 };
@@ -737,7 +747,8 @@ function supaFetch(method,path,body){
 
 // DB 컬럼 ↔ JS 필드 변환
 function toJS_target(r){return{id:r.id,cat:r.cat,age:r.age||'',pain:r.pain||'',slogan:r.slogan||'',period:r.period||'90일',resultNum:r.result_num||'',resultEmo:r.result_emo||'',urgency:r.urgency||'높음',spend:r.spend||'중간',existing:r.existing||'N - 새 시장',competition:r.competition||'중간',prio:r.prio||'3'};}
-function toJS_inst(r){return{id:r.id,targetId:r.target_id,name:r.name||'',channel:r.channel||'유튜브',followers:r.followers||'',story:r.story||'',sincerity:r.sincerity||3,empathy:r.empathy||3,diff:r.diff||'중',contact:r.contact||'DM',status:r.status||'미컨택',memo:r.memo||''};}
+function toJS_inst(r){return{id:r.id,targetId:r.target_id,name:r.name||'',channel:r.channel||'유튜브',followers:r.followers||'',story:r.story||'',sincerity:r.sincerity||3,empathy:r.empathy||3,diff:r.diff||'중',contact:r.contact||'DM',status:r.status||'미컨택',memo:r.memo||'',instagram:r.instagram||'',youtube:r.youtube||'',blog:r.blog||'',threads:r.threads||'',website:r.website||'',email:r.email||'',phone:r.phone||'',kakao:r.kakao||''};}
+function toDB_inst(i){return{target_id:i.targetId||null,name:i.name,channel:i.channel,followers:i.followers,story:i.story,sincerity:i.sincerity,empathy:i.empathy,diff:i.diff,contact:i.contact,status:i.status,memo:i.memo,instagram:i.instagram||null,youtube:i.youtube||null,blog:i.blog||null,threads:i.threads||null,website:i.website||null,email:i.email||null,phone:i.phone||null,kakao:i.kakao||null};}
 function toJS_meet(r){
   return{id:r.id,instId:r.inst_id,instName:r.inst_name||'',linkedSlogan:r.linked_slogan||'',date:r.meeting_date||'',topic:r.topic||'',reaction:r.reaction||'긍정',conditions:r.conditions||'',next:r.next_action||'',status:r.status||'진행중'};
 }
@@ -861,6 +872,12 @@ function cell(type,id,field,inner,cls,noEdit){
   var c='cell '+(cls||'');if(noEdit)c+=' no-edit';
   var a=noEdit?'':' data-type="'+type+'" data-id="'+id+'" data-field="'+field+'"';
   return'<div class="'+c+'"'+a+'>'+inner+'</div>';
+}
+function linkCell(v,type,id,f,icon){
+  var display=v
+    ?'<a href="'+(v.startsWith('http')?v:'https://'+v)+'" target="_blank" style="color:var(--accent-2);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:4px" onclick="event.stopPropagation()"><span>'+icon+'</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px">'+v.replace(/https?:\/\/(www\.)?/,'')+'</span></a>'
+    :'<span style="color:var(--text-3);font-size:11px">—</span>';
+  return cell(type,id,f,display,'');
 }
 function txtCell(v,type,id,f,cls){return cell(type,id,f,dash(v),cls||'cell-text');}
 function selCell(v,type,id,f,display){return cell(type,id,f,display,'');}
@@ -1006,7 +1023,7 @@ function renderInstructors(){
     });
   }
   var body=document.getElementById('inst-body');
-  if(!rows.length){body.innerHTML='<tr><td colspan="12"><div class="empty-state"><div class="empty-state-icon">🎤</div><div class="empty-state-title">강사 후보가 없습니다</div><div class="empty-state-sub">"+ 강사 추가"로 후보를 등록하세요</div></div></td></tr>';return;}
+  if(!rows.length){body.innerHTML='<tr><td colspan="20"><div class="empty-state"><div class="empty-state-icon">🎤</div><div class="empty-state-title">강사 후보가 없습니다</div><div class="empty-state-sub">"+ 강사 추가"로 후보를 등록하세요</div></div></td></tr>';return;}
   body.innerHTML=rows.map(function(i){
     var t=targets.find(function(t){return t.id==i.targetId;});
     return'<tr>'
@@ -1020,6 +1037,14 @@ function renderInstructors(){
       +'<td>'+selCell(i.diff,'i',i.id,'diff','<span class="cell-muted">'+i.diff+'</span>')+'</td>'
       +'<td>'+selCell(i.contact,'i',i.id,'contact','<span class="cell-muted">'+i.contact+'</span>')+'</td>'
       +'<td>'+selCell(i.status,'i',i.id,'status','<span class="badge '+istClass(i.status)+'">'+i.status+'</span>')+'</td>'
+      +'<td>'+linkCell(i.instagram,'i',i.id,'instagram','📷')+'</td>'
+      +'<td>'+linkCell(i.youtube,'i',i.id,'youtube','▶')+'</td>'
+      +'<td>'+linkCell(i.blog,'i',i.id,'blog','✍')+'</td>'
+      +'<td>'+linkCell(i.threads,'i',i.id,'threads','@')+'</td>'
+      +'<td>'+linkCell(i.website,'i',i.id,'website','🌐')+'</td>'
+      +'<td>'+txtCell(i.email,'i',i.id,'email','cell-small')+'</td>'
+      +'<td>'+txtCell(i.phone,'i',i.id,'phone','cell-muted')+'</td>'
+      +'<td>'+txtCell(i.kakao,'i',i.id,'kakao','cell-muted')+'</td>'
       +'<td>'+txtCell(i.memo,'i',i.id,'memo','cell-small')+'</td>'
       +'<td><button class="del-btn" data-del-type="i" data-del-id="'+i.id+'">✕</button></td>'
     +'</tr>';
