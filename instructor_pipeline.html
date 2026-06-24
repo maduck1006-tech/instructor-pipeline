@@ -375,6 +375,7 @@ tr:hover .row-edit-btn{opacity:1}
         <div class="topbar-right">
           <button class="tb-btn" id="export-csv">CSV</button>
           <button class="tb-btn" id="export-xlsx">엑셀</button>
+          <button class="tb-btn" id="bulk-generate-btn" style="border-color:rgba(94,106,210,.4);color:var(--accent-2)">✦ 대량 생성</button>
           <button class="tb-btn primary" id="add-target">+ 타겟 추가</button>
         </div>
       </div>
@@ -733,6 +734,87 @@ tr:hover .row-edit-btn{opacity:1}
   </div>
 </div>
 
+
+<!-- 대량 타겟 생성 모달 -->
+<div class="modal-bg" id="bulk-gen-modal">
+  <div class="modal-box" style="width:640px;max-height:90vh;overflow-y:auto">
+    <button class="modal-close" onclick="document.getElementById('bulk-gen-modal').classList.remove('open')">✕</button>
+    <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <span style="color:var(--accent-2)">✦</span> 타겟 대량 생성
+    </h3>
+    <div class="modal-sub" id="bulk-gen-sub">아래 칸에 공략할 타겟과 고통을 입력하면 AI가 한 번에 여러 타겟을 생성합니다</div>
+
+    <!-- 입력 단계 -->
+    <div id="bulk-gen-input-step">
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:4px">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">대분류 (여러 개 선택)</label>
+            <div id="bulk-cat-pills" style="display:flex;flex-wrap:wrap;gap:5px">
+              <button class="pill on" data-cat="남성">남성</button>
+              <button class="pill" data-cat="여성">여성</button>
+              <button class="pill" data-cat="직장인">직장인</button>
+              <button class="pill" data-cat="시니어">시니어</button>
+              <button class="pill" data-cat="자영업자">자영업자</button>
+              <button class="pill" data-cat="학생">학생</button>
+              <button class="pill" data-cat="부모">부모</button>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">생성할 타겟 수</label>
+            <select id="bulk-count" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+              <option value="3">3개</option>
+              <option value="5" selected>5개</option>
+              <option value="8">8개</option>
+              <option value="10">10개</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">
+            핵심 고통 목록
+            <span style="color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px"> — 한 줄에 하나씩 입력</span>
+          </label>
+          <textarea id="bulk-pains" placeholder="예시:
+살이 쪄서 자존감이 낮음
+운동을 시작하고 싶은데 방법을 모름
+다이어트를 반복 실패함
+퇴근 후 체력이 없어서 운동 못 함
+뱃살이 너무 나와서 옷이 안 맞음
+발기부전으로 자신감 상실
+여유증으로 외출이 두려움
+
+(비워두면 AI가 선택한 카테고리에 맞게 자동 생성)" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:10px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none;resize:vertical;min-height:160px;line-height:1.8"></textarea>
+        </div>
+
+        <div>
+          <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">추가 지시사항 <span style="color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">(선택)</span></label>
+          <input id="bulk-extra" type="text" placeholder="예: 블루오션 위주로, 고령층 포함, 기존지출 있는 시장 우선" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+        <button onclick="document.getElementById('bulk-gen-modal').classList.remove('open')" style="padding:8px 16px;border:1px solid var(--border-2);border-radius:7px;background:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">취소</button>
+        <button id="bulk-gen-run" style="padding:8px 22px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;font-weight:600;font-family:Pretendard,sans-serif">✦ AI 생성 시작</button>
+      </div>
+    </div>
+
+    <!-- 미리보기 단계 -->
+    <div id="bulk-gen-preview-step" style="display:none">
+      <div id="bulk-preview-list" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
+        <button onclick="showBulkInput()" style="padding:8px 14px;border:1px solid var(--border-2);border-radius:7px;background:none;color:var(--accent-2);font-size:12.5px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">↺ 다시 생성</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="bulk-selected-count" style="font-size:12.5px;color:var(--text-3)"></span>
+          <button onclick="document.getElementById('bulk-gen-modal').classList.remove('open')" style="padding:8px 16px;border:1px solid var(--border-2);border-radius:7px;background:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">취소</button>
+          <button id="bulk-apply-btn" style="padding:8px 22px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;font-weight:600;font-family:Pretendard,sans-serif">선택 항목 추가</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- 타겟 일괄 수정 모달 -->
 <div class="modal-bg" id="target-edit-modal">
@@ -1934,7 +2016,168 @@ function applyInstEdit(){
   showToast('✦ '+i.name+' 수정됐습니다',false,false);
 }
 
-// 수정 모달 닫기 이벤트
+// ── 대량 타겟 생성 ──
+var bulkGenResults=[];
+
+function showBulkInput(){
+  document.getElementById('bulk-gen-input-step').style.display='block';
+  document.getElementById('bulk-gen-preview-step').style.display='none';
+  document.getElementById('bulk-gen-sub').textContent='아래 칸에 공략할 타겟과 고통을 입력하면 AI가 한 번에 여러 타겟을 생성합니다';
+}
+
+document.getElementById('bulk-generate-btn').addEventListener('click',function(){
+  showBulkInput();
+  document.getElementById('bulk-gen-modal').classList.add('open');
+});
+
+// 카테고리 필 토글 (복수 선택)
+document.getElementById('bulk-cat-pills').addEventListener('click',function(e){
+  var p=e.target.closest('[data-cat]');
+  if(!p)return;
+  p.classList.toggle('on');
+});
+
+document.getElementById('bulk-gen-run').addEventListener('click',function(){
+  var cats=[...document.querySelectorAll('#bulk-cat-pills .pill.on')].map(function(p){return p.dataset.cat;});
+  if(!cats.length){showToast('대분류를 하나 이상 선택해주세요',true,false);return;}
+  var count=document.getElementById('bulk-count').value;
+  var pains=document.getElementById('bulk-pains').value.trim();
+  var extra=document.getElementById('bulk-extra').value.trim();
+
+  showLoading();
+  document.getElementById('bulk-gen-run').textContent='생성 중...';
+  document.getElementById('bulk-gen-run').disabled=true;
+
+  var prompt='당신은 한국 온라인 교육 콘텐츠 기획 전문가입니다.\n\n'
+    +'아래 조건으로 타겟 × 주제를 '+count+'개 생성해주세요.\n\n'
+    +'[조건]\n'
+    +'대분류: '+cats.join(', ')+'\n'
+    +(pains?'핵심 고통 목록 (아래 내용 기반으로 생성):\n'+pains+'\n':( '핵심 고통: 각 카테고리에 맞게 자동 선정\n'))
+    +(extra?'추가 지시: '+extra+'\n':'')
+    +'\n[출력 형식 - JSON 배열만 출력, 다른 텍스트 없이]\n'
+    +'[\n'
+    +'  {\n'
+    +'    "cat": "대분류 ('+cats.join('/')+' 중 하나)",\n'
+    +'    "age": "연령대 (예: 2030, 4060, 전연령)",\n'
+    +'    "pain": "핵심 고통 한 문장",\n'
+    +'    "slogan": "주제 슬로건 (타겟+문제+기간+결과 형태)",\n'
+    +'    "period": "30일 또는 60일 또는 90일 또는 100일 또는 120일",\n'
+    +'    "resultNum": "수치 결과 (예: -15kg, +8kg)",\n'
+    +'    "resultEmo": "감정 결과 한 문장",\n'
+    +'    "urgency": "매우 높음 또는 높음 또는 중간 또는 낮음",\n'
+    +'    "spend": "매우 높음 또는 높음 또는 중간 또는 낮음",\n'
+    +'    "existing": "Y - 이미 돈 씀 또는 N - 새 시장",\n'
+    +'    "competition": "낮음 (블루오션) 또는 중간 또는 높음 (레드오션)",\n'
+    +'    "prio": "1 또는 2 또는 3 또는 4 또는 5"\n'
+    +'  }\n'
+    +']';
+
+  fetch(GROQ_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+    body:JSON.stringify({
+      model:'llama-3.3-70b-versatile',
+      messages:[
+        {role:'system',content:'당신은 한국 온라인 교육 콘텐츠 기획 전문가입니다. 반드시 JSON 배열만 출력하고 다른 텍스트는 절대 포함하지 마세요.'},
+        {role:'user',content:prompt}
+      ],
+      temperature:0.8,max_tokens:2048
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var text=data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
+    if(!text)throw new Error('응답 없음');
+    var match=text.match(/\[[\s\S]*\]/);
+    if(!match)throw new Error('JSON 파싱 실패');
+    var results=JSON.parse(match[0]);
+    hideLoading();
+    document.getElementById('bulk-gen-run').textContent='✦ AI 생성 시작';
+    document.getElementById('bulk-gen-run').disabled=false;
+    bulkGenResults=results;
+    showBulkPreview(results);
+  })
+  .catch(function(err){
+    hideLoading();
+    document.getElementById('bulk-gen-run').textContent='✦ AI 생성 시작';
+    document.getElementById('bulk-gen-run').disabled=false;
+    showToast('AI 오류: '+err.message,true,false);
+  });
+});
+
+function showBulkPreview(results){
+  document.getElementById('bulk-gen-input-step').style.display='none';
+  document.getElementById('bulk-gen-preview-step').style.display='block';
+  document.getElementById('bulk-gen-sub').textContent='추가할 항목을 선택하세요. 슬로건을 클릭하면 수정할 수 있습니다.';
+
+  var IS='border:none;background:transparent;color:var(--text-1);font-family:Pretendard,sans-serif;font-size:13px;font-weight:500;outline:none;width:100%;padding:0';
+
+  var html=results.map(function(t,idx){
+    var sc=calcScore(t);var sl=scoreLabel(sc);
+    return'<div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start">'
+      +'<input type="checkbox" class="bulk-check" data-idx="'+idx+'" checked style="margin-top:3px;accent-color:var(--accent);width:15px;height:15px;cursor:pointer;flex-shrink:0">'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">'
+          +'<span class="badge '+catClass(t.cat)+'">'+t.cat+'</span>'
+          +'<span style="font-size:12px;color:var(--text-3)">'+t.age+'</span>'
+          +'<span class="score-chip '+sl.cls+'">'+sl.txt+' '+sc+'</span>'
+          +'<span class="badge '+urgClass(t.urgency)+'">'+t.urgency+'</span>'
+          +'<span class="badge prio-'+t.prio+'">'+t.prio+'순위</span>'
+        +'</div>'
+        +'<input class="bulk-slogan" data-idx="'+idx+'" value="'+(t.slogan||'').replace(/"/g,'&quot;')+'" style="'+IS+';margin-bottom:4px;font-weight:600;font-size:13.5px">'
+        +'<div style="font-size:12px;color:var(--text-3);display:flex;gap:12px;flex-wrap:wrap">'
+          +'<span>😣 '+t.pain+'</span>'
+          +'<span>📊 '+t.resultNum+'</span>'
+          +'<span>💬 '+t.resultEmo+'</span>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+
+  document.getElementById('bulk-preview-list').innerHTML=html;
+  updateBulkCount();
+
+  // 체크박스 변경 시 카운트 업데이트
+  document.querySelectorAll('.bulk-check').forEach(function(cb){
+    cb.addEventListener('change',updateBulkCount);
+  });
+  // 슬로건 수정 시 결과 배열 업데이트
+  document.querySelectorAll('.bulk-slogan').forEach(function(inp){
+    inp.addEventListener('input',function(){
+      bulkGenResults[parseInt(this.dataset.idx)].slogan=this.value;
+    });
+  });
+}
+
+function updateBulkCount(){
+  var checked=document.querySelectorAll('.bulk-check:checked').length;
+  document.getElementById('bulk-selected-count').textContent=checked+'개 선택됨';
+  document.getElementById('bulk-apply-btn').textContent='선택 '+checked+'개 추가';
+}
+
+document.getElementById('bulk-apply-btn').addEventListener('click',function(){
+  var checked=[...document.querySelectorAll('.bulk-check:checked')].map(function(cb){return parseInt(cb.dataset.idx);});
+  if(!checked.length){showToast('추가할 항목을 선택해주세요',true,false);return;}
+  var promises=[];
+  checked.forEach(function(idx){
+    var t=bulkGenResults[idx];
+    var newT={
+      id:'new_'+Date.now()+'_'+idx,
+      cat:t.cat,age:t.age,pain:t.pain,slogan:t.slogan,period:t.period,
+      resultNum:t.resultNum,resultEmo:t.resultEmo,urgency:t.urgency,spend:t.spend,
+      existing:t.existing,competition:t.competition,prio:t.prio
+    };
+    targets.push(newT);
+    promises.push(saveTarget(newT));
+  });
+  Promise.all(promises).then(function(){renderTargets();updateNavCounts();});
+  document.getElementById('bulk-gen-modal').classList.remove('open');
+  showToast('✦ '+checked.length+'개 타겟 추가됐습니다',false,false);
+});
+
+document.getElementById('bulk-gen-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+
+// ── 수정 모달 닫기 이벤트 ──
 document.getElementById('target-edit-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 document.getElementById('inst-edit-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 // Enter 키 저장
