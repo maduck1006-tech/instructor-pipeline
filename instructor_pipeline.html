@@ -491,16 +491,16 @@ tr:hover .row-edit-btn{opacity:1}
               <th style="width:56px">난이도</th>
               <th style="width:68px">컨택</th>
               <th style="width:80px">상태</th>
-              <th style="width:110px">인스타</th>
-              <th style="width:110px">유튜브</th>
-              <th style="width:90px">블로그</th>
-              <th style="width:90px">스레드</th>
-              <th style="width:100px">웹사이트</th>
-              <th style="width:130px">이메일</th>
-              <th style="width:110px">전화번호</th>
-              <th style="width:110px">카카오채널</th>
               <th style="width:110px">메모</th>
-              <th style="width:36px"></th>
+              <th class="sns-col" style="width:110px">인스타</th>
+              <th class="sns-col" style="width:110px">유튜브</th>
+              <th class="sns-col" style="width:90px">블로그</th>
+              <th class="sns-col" style="width:90px">스레드</th>
+              <th class="sns-col" style="width:100px">웹사이트</th>
+              <th class="sns-col" style="width:130px">이메일</th>
+              <th class="sns-col" style="width:110px">전화번호</th>
+              <th class="sns-col" style="width:110px">카카오채널</th>
+              <th style="width:68px"></th>
             </tr></thead>
             <tbody id="inst-body"></tbody>
           </table>
@@ -2336,6 +2336,15 @@ document.addEventListener('click',function(e){
     if(!String(did).startsWith('new'))deleteFromDB(tableMap[dt],did);
     renderAll();
     showToast((labelMap[dt]||'항목')+' 삭제됨 — Ctrl+Z로 되돌리기',false,true);
+    return;
+  }
+  // 수정 버튼
+  var editBtn=e.target.closest('.row-edit-btn');
+  if(editBtn){
+    var et=editBtn.dataset.editType;
+    var eid=editBtn.dataset.editId;
+    if(et==='t')openTargetEdit(eid);
+    if(et==='i')openInstEdit(eid);
     return;
   }
   var drill=e.target.closest('.drill-cell');
