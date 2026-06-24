@@ -1670,7 +1670,7 @@ function runInstAi(){
     body:JSON.stringify({
       model:'llama-3.3-70b-versatile',
       messages:[
-        {role:'system',content:'당신은 한국 온라인 교육 콘텐츠 강사 섭외 전문가입니다. 반드시 JSON만 출력하세요.'},
+        {role:'system',content:'당신은 한국 온라인 교육 콘텐츠 강사 섭외 전문가입니다. 반드시 한국어로만 답변하고 JSON만 출력하세요. 영어, 중국어 등 다른 언어 절대 금지.'},
         {role:'user',content:prompt}
       ],
       temperature:0.6,max_tokens:512
@@ -2049,21 +2049,27 @@ document.getElementById('bulk-gen-run').addEventListener('click',function(){
   document.getElementById('bulk-gen-run').disabled=true;
 
   var prompt='당신은 한국 온라인 교육 콘텐츠 기획 전문가입니다.\n\n'
+    +'⚠️ 중요: 모든 출력은 반드시 한국어로만 작성하세요. 영어, 중국어, 일본어 등 다른 언어는 절대 사용하지 마세요.\n\n'
     +'아래 조건으로 타겟 × 주제를 '+count+'개 생성해주세요.\n\n'
     +'[조건]\n'
     +'대분류: '+cats.join(', ')+'\n'
-    +(pains?'핵심 고통 목록 (아래 내용 기반으로 생성):\n'+pains+'\n':( '핵심 고통: 각 카테고리에 맞게 자동 선정\n'))
+    +(pains?'핵심 고통 목록 (아래 내용 기반으로 생성):\n'+pains+'\n':('핵심 고통: 각 카테고리에 맞게 자동 선정\n'))
     +(extra?'추가 지시: '+extra+'\n':'')
-    +'\n[출력 형식 - JSON 배열만 출력, 다른 텍스트 없이]\n'
+    +'\n[출력 규칙]\n'
+    +'- 모든 텍스트는 한국어로만 작성\n'
+    +'- slogan은 "XX일 동안" 대신 "XX일" 형태로 자연스럽게\n'
+    +'- resultEmo는 감정이 느껴지는 짧은 한국어 문장\n'
+    +'- JSON 배열만 출력, 설명 텍스트 없이\n\n'
+    +'[출력 형식]\n'
     +'[\n'
     +'  {\n'
     +'    "cat": "대분류 ('+cats.join('/')+' 중 하나)",\n'
     +'    "age": "연령대 (예: 2030, 4060, 전연령)",\n'
-    +'    "pain": "핵심 고통 한 문장",\n'
-    +'    "slogan": "주제 슬로건 (타겟+문제+기간+결과 형태)",\n'
+    +'    "pain": "핵심 고통 한 문장 (한국어)",\n'
+    +'    "slogan": "주제 슬로건 (한국어, 예: 직장인 90일 루틴 메이커)",\n'
     +'    "period": "30일 또는 60일 또는 90일 또는 100일 또는 120일",\n'
     +'    "resultNum": "수치 결과 (예: -15kg, +8kg)",\n'
-    +'    "resultEmo": "감정 결과 한 문장",\n'
+    +'    "resultEmo": "감정 결과 한 문장 (한국어, 예: 처음으로 반팔을 입은 여름)",\n'
     +'    "urgency": "매우 높음 또는 높음 또는 중간 또는 낮음",\n'
     +'    "spend": "매우 높음 또는 높음 또는 중간 또는 낮음",\n'
     +'    "existing": "Y - 이미 돈 씀 또는 N - 새 시장",\n'
@@ -2078,10 +2084,10 @@ document.getElementById('bulk-gen-run').addEventListener('click',function(){
     body:JSON.stringify({
       model:'llama-3.3-70b-versatile',
       messages:[
-        {role:'system',content:'당신은 한국 온라인 교육 콘텐츠 기획 전문가입니다. 반드시 JSON 배열만 출력하고 다른 텍스트는 절대 포함하지 마세요.'},
+        {role:'system',content:'당신은 한국 온라인 교육 콘텐츠 기획 전문가입니다. 반드시 한국어로만 답변하고, JSON 배열만 출력하세요. 영어, 중국어, 일본어 등 다른 언어는 절대 사용하지 마세요.'},
         {role:'user',content:prompt}
       ],
-      temperature:0.8,max_tokens:2048
+      temperature:0.7,max_tokens:2048
     })
   })
   .then(function(r){return r.json();})
@@ -2264,7 +2270,7 @@ function runAiFromInput(){
     body:JSON.stringify({
       model:'llama-3.3-70b-versatile',
       messages:[
-        {role:'system',content:'당신은 한국 온라인 교육 콘텐츠 기획 전문가입니다. 반드시 JSON만 출력하고 다른 텍스트는 절대 포함하지 마세요.'},
+        {role:'system',content:'당신은 한국 온라인 교육 콘텐츠 기획 전문가입니다. 반드시 한국어로만 답변하고 JSON만 출력하세요. 영어, 중국어 등 다른 언어 절대 금지.'},
         {role:'user',content:prompt}
       ],
       temperature:0.7,
