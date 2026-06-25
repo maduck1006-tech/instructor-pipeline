@@ -574,14 +574,35 @@ tr:hover .row-edit-btn{opacity:1}
           <span class="topbar-sub">섭외 현황 한눈에 보기</span>
         </div>
       </div>
-      <div class="content" style="overflow-y:auto">
-        <div class="dash-wrap">
+      <div class="content" style="overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;flex:1">
+        <div class="dash-wrap" style="flex:1">
+          <!-- 핵심 지표 -->
           <div class="stat-grid" id="dash-stats"></div>
-          <div class="dash-grid">
-            <div class="dash-card"><h4>강사 컨택 현황</h4><div id="dash-ist"></div></div>
-            <div class="dash-card"><h4>우선순위별 타겟</h4><div id="dash-prio"></div></div>
+
+          <!-- 섹션 1: 영업 현황 -->
+          <div style="font-size:10.5px;font-weight:600;color:var(--text-3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;margin-top:4px">영업 현황</div>
+          <div style="margin-bottom:10px">
             <div class="dash-card"><h4>섭외 전환 퍼널</h4><div id="dash-funnel"></div></div>
-            <div class="dash-card"><h4>황금 주제 — 시급 높음 + 기존 지출</h4><div id="dash-gold"></div></div>
+          </div>
+          <div class="dash-grid" style="margin-bottom:14px">
+            <div class="dash-card"><h4>강사 컨택 상태</h4><div id="dash-ist"></div></div>
+            <div class="dash-card"><h4>미팅 반응 분포</h4><div id="dash-reaction"></div></div>
+            <div class="dash-card"><h4>채널별 강사 분포</h4><div id="dash-channel"></div></div>
+          </div>
+
+          <!-- 섹션 2: 이번 주 할 일 -->
+          <div style="font-size:10.5px;font-weight:600;color:var(--text-3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">이번 주 할 일</div>
+          <div style="margin-bottom:14px">
+            <div class="dash-card"><h4>다음 액션 목록</h4><div id="dash-actions"></div></div>
+          </div>
+
+          <!-- 섹션 3: 기획 현황 -->
+          <div style="font-size:10.5px;font-weight:600;color:var(--text-3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">기획 현황</div>
+          <div class="dash-grid" style="margin-bottom:14px">
+            <div class="dash-card"><h4>우선순위별 타겟</h4><div id="dash-prio"></div></div>
+            <div class="dash-card"><h4>자동점수 분포 (S/A/B/C급)</h4><div id="dash-score"></div></div>
+            <div class="dash-card"><h4>주제별 강사 매칭 현황</h4><div id="dash-matching"></div></div>
+            <div class="dash-card"><h4>블루오션 + 기존지출 황금 주제</h4><div id="dash-gold"></div></div>
           </div>
         </div>
       </div>
@@ -1283,6 +1304,7 @@ function loadData(){
     meetings=(res[2]||[]).map(toJS_meet);
     setSaveStatus(true);
     renderAll();
+    renderDashboard();
   }).catch(function(e){
     console.error(e);
     setSaveStatus(false);
@@ -1578,31 +1600,190 @@ function renderDashboard(){
   var contacted=instructors.filter(function(i){return i.status!=='미컨택';}).length;
   var met=instructors.filter(function(i){return i.status==='미팅확정'||i.status==='협의중'||i.status==='완료';}).length;
   var done=instructors.filter(function(i){return i.status==='완료';}).length;
-  var gold=targets.filter(function(t){return(t.urgency==='매우 높음'||t.urgency==='높음')&&t.existing&&t.existing.indexOf('Y')===0;}).length;
+  var failed=instructors.filter(function(i){return i.status==='불발';}).length;
   var contactRate=total?Math.round(contacted/total*100):0;
   var meetRate=contacted?Math.round(met/contacted*100):0;
   var doneRate=met?Math.round(done/met*100):0;
+  var scoreS=targets.filter(function(t){return calcScore(t)>=10;}).length;
+  var scoreA=targets.filter(function(t){var s=calcScore(t);return s>=7&&s<10;}).length;
+  var actionsCount=meetings.filter(function(m){return m.next&&m.next.trim()&&m.status==='진행중';}).length;
+  var goldCount=targets.filter(function(t){return t.competition&&t.competition.indexOf('낮음')>=0&&t.existing&&t.existing.indexOf('Y')===0;}).length;
+
+  // ── 통계 카드 ──
   document.getElementById('dash-stats').innerHTML=
-    sc('전체 타겟',targets.length,'')+sc('강사 후보',total,'')+
-    sc('컨택 진행',contacted,contactRate+'% 전환')+sc('미팅 성사',met,meetRate+'% 전환')+
-    sc('섭외 완료',done,doneRate+'% 전환')+sc('황금 주제',gold,'');
+    sc('전체 타겟',targets.length,targets.length+'개 주제 등록')+
+    sc('강사 후보',total,total+'명 등록')+
+    sc('컨택 진행',contacted,contactRate+'% 전환율')+
+    sc('미팅 성사',met,meetRate+'% 전환율')+
+    sc('섭외 완료',done,doneRate+'% 전환율')+
+    sc('S/A급 주제',scoreS+scoreA,'S:'+scoreS+' A:'+scoreA)+
+    sc('진행중 액션',actionsCount,'미팅 다음 할 일')+
+    sc('황금 주제',goldCount,'블루오션+기존지출');
+
+  // ── 섭외 전환 퍼널 (시각적 퍼널) ──
+  var funnelData=[
+    {label:'강사 후보',val:total,color:'#6366f1',sub:'전체 등록'},
+    {label:'컨택 시도',val:contacted,color:'#8b5cf6',sub:contactRate+'% 전환'},
+    {label:'미팅 성사',val:met,color:'#a78bfa',sub:meetRate+'% 전환'},
+    {label:'섭외 완료',val:done,color:'#4ade80',sub:doneRate+'% 전환'},
+  ];
+  var maxFV=Math.max.apply(null,funnelData.map(function(f){return f.val;}).concat([1]));
+  var funnelHTML='<div style="padding:8px 0">';
+  funnelData.forEach(function(f,idx){
+    var widthPct=Math.max(Math.round(f.val/maxFV*100),8);
+    var marginPct=(100-widthPct)/2;
+    var nextF=funnelData[idx+1];
+    funnelHTML+=
+      '<div style="margin:0 0 2px;position:relative">'
+        // 퍼널 블록
+        +'<div style="margin-left:'+marginPct+'%;width:'+widthPct+'%;background:'+f.color+';border-radius:'+(idx===0?'8px 8px':'0')+(idx===funnelData.length-1?' 8px 8px':' 0 0')+';padding:10px 16px;display:flex;justify-content:space-between;align-items:center;transition:all .4s">'
+          +'<span style="font-size:12.5px;font-weight:600;color:#fff">'+f.label+'</span>'
+          +'<div style="text-align:right">'
+            +'<div style="font-size:20px;font-weight:700;color:#fff;line-height:1">'+f.val+'</div>'
+            +'<div style="font-size:10.5px;color:rgba(255,255,255,.65);margin-top:1px">'+f.sub+'</div>'
+          +'</div>'
+        +'</div>'
+        // 아래 화살표 (마지막 제외)
+        +(nextF&&f.val>0?
+          '<div style="text-align:center;margin:0;line-height:1">'
+            +'<div style="display:inline-block;font-size:11px;color:var(--text-3);padding:2px 8px">'
+              +(nextF.val>0?'↓ '+Math.round(nextF.val/f.val*100)+'% 전환':'↓ 0%')
+            +'</div>'
+          +'</div>'
+        :'')
+      +'</div>';
+  });
+  // 불발 표시
+  if(failed>0){
+    funnelHTML+='<div style="margin-top:10px;padding:8px 12px;background:rgba(242,92,92,.1);border:1px solid rgba(242,92,92,.2);border-radius:6px;display:flex;justify-content:space-between;align-items:center">'
+      +'<span style="font-size:12px;color:var(--red)">🚫 불발</span>'
+      +'<span style="font-size:16px;font-weight:700;color:var(--red)">'+failed+'명</span>'
+    +'</div>';
+  }
+  funnelHTML+='</div>';
+  document.getElementById('dash-funnel').innerHTML=funnelHTML;
+
+  // ── 강사 컨택 상태 ──
   var stMap={};instructors.forEach(function(i){stMap[i.status]=(stMap[i.status]||0)+1;});
   document.getElementById('dash-ist').innerHTML=Object.keys(stMap).length
-    ?Object.entries(stMap).map(function(e){return barRow(e[0],e[1],total,'#a16207');}).join('')
+    ?Object.entries(stMap).map(function(e){
+      var color={'미컨택':'var(--text-3)','컨택중':'var(--yellow)','미팅확정':'var(--blue)','협의중':'var(--accent-2)','완료':'var(--green)','불발':'var(--red)'}[e[0]]||'var(--text-3)';
+      return barRow(e[0],e[1],total,color);
+    }).join('')
     :'<p class="dash-empty">강사 데이터 없음</p>';
+
+  // ── 미팅 반응 분포 ──
+  var rMap={긍정:0,중립:0,부정:0};
+  meetings.forEach(function(m){if(rMap[m.reaction]!==undefined)rMap[m.reaction]++;});
+  var totalR=meetings.length||1;
+  document.getElementById('dash-reaction').innerHTML=meetings.length
+    ?'<div style="display:flex;gap:8px;margin-bottom:14px">'
+      +Object.entries(rMap).map(function(e){
+        var color=e[0]==='긍정'?'var(--green)':e[0]==='부정'?'var(--red)':'var(--text-3)';
+        var pct=Math.round(e[1]/totalR*100);
+        return'<div style="flex:1;background:var(--bg-3);border-radius:8px;padding:12px;text-align:center">'
+          +'<div style="font-size:20px;font-weight:700;color:'+color+'">'+e[1]+'</div>'
+          +'<div style="font-size:11px;color:var(--text-3);margin-top:3px">'+e[0]+' '+pct+'%</div>'
+        +'</div>';
+      }).join('')
+    +'</div>'
+    +barRow('긍정',rMap['긍정'],totalR,'var(--green)')
+    +barRow('중립',rMap['중립'],totalR,'var(--text-3)')
+    +barRow('부정',rMap['부정'],totalR,'var(--red)')
+    :'<p class="dash-empty">미팅 데이터 없음</p>';
+
+  // ── 채널별 강사 분포 ──
+  var chMap={};instructors.forEach(function(i){chMap[i.channel]=(chMap[i.channel]||0)+1;});
+  var maxCh=Math.max.apply(null,Object.values(chMap).concat([1]));
+  var chColors={'유튜브':'#ff4444','인스타':'#c13584','블로그':'var(--blue)','틱톡':'#000','오프라인':'var(--green)','복합':'var(--accent-2)'};
+  document.getElementById('dash-channel').innerHTML=Object.keys(chMap).length
+    ?Object.entries(chMap).sort(function(a,b){return b[1]-a[1];}).map(function(e){
+      return barRow(e[0],e[1],maxCh,chColors[e[0]]||'var(--text-3)');
+    }).join('')
+    :'<p class="dash-empty">강사 데이터 없음</p>';
+
+  // ── 다음 액션 목록 ──
+  var actions=meetings.filter(function(m){return m.next&&m.next.trim()&&m.status==='진행중';});
+  document.getElementById('dash-actions').innerHTML=actions.length
+    ?actions.map(function(m){
+      return'<div class="dash-item" style="flex-direction:column;align-items:flex-start;gap:4px;padding:10px 0">'
+        +'<div style="display:flex;align-items:center;gap:8px;width:100%;justify-content:space-between">'
+          +'<span style="font-weight:600;color:var(--text-1)">'+m.instName+'</span>'
+          +(m.date?'<span style="font-size:11px;color:var(--text-3)">'+m.date+'</span>':'')
+        +'</div>'
+        +'<div style="font-size:12.5px;color:var(--accent-2)">→ '+m.next+'</div>'
+        +(m.linkedSlogan?'<div style="font-size:11.5px;color:var(--text-3)">'+m.linkedSlogan+'</div>':'')
+      +'</div>';
+    }).join('')
+    :'<div style="text-align:center;padding:24px 0;color:var(--text-3);font-size:13px">진행중인 액션이 없습니다<br><span style="font-size:12px">미팅 로그에서 다음 액션을 입력하세요</span></div>';
+
+  // ── 우선순위별 타겟 ──
   var pMap={};targets.forEach(function(t){pMap[t.prio]=(pMap[t.prio]||0)+1;});
   var maxP=Math.max.apply(null,Object.values(pMap).concat([1]));
-  document.getElementById('dash-prio').innerHTML=Object.entries(pMap).sort(function(a,b){return a[0]-b[0];}).map(function(e){return barRow(e[0]+'순위',e[1],maxP,'#1d4ed8');}).join('');
-  var funnelData=[['강사 후보',total,'#78716c'],['컨택 시도',contacted,'#a16207'],['미팅 성사',met,'#1d4ed8'],['섭외 완료',done,'#15803d']];
-  var maxF=Math.max.apply(null,funnelData.map(function(f){return f[1];}).concat([1]));
-  document.getElementById('dash-funnel').innerHTML=funnelData.map(function(f){
-    var pct=f[1]&&funnelData[0][1]?Math.round(f[1]/funnelData[0][1]*100):0;
-    return'<div class="funnel-row"><span class="funnel-label">'+f[0]+'</span><div class="funnel-bar"><div class="funnel-fill" style="width:'+(maxF?Math.round(f[1]/maxF*100):0)+'%;background:'+f[2]+'">'+f[1]+'</div></div><span class="funnel-pct">'+pct+'%</span></div>';
+  var prioColors={'1':'var(--red)','2':'var(--yellow)','3':'var(--green)','4':'var(--blue)','5':'var(--text-3)'};
+  document.getElementById('dash-prio').innerHTML=Object.entries(pMap).sort(function(a,b){return a[0]-b[0];}).map(function(e){
+    return barRow(e[0]+'순위',e[1],maxP,prioColors[e[0]]||'var(--text-3)');
   }).join('');
-  var goldList=targets.filter(function(t){return(t.urgency==='매우 높음'||t.urgency==='높음')&&t.existing&&t.existing.indexOf('Y')===0;});
+
+  // ── 자동점수 분포 ──
+  var scoreMap={S:0,A:0,B:0,C:0};
+  targets.forEach(function(t){
+    var s=calcScore(t);
+    if(s>=10)scoreMap.S++;
+    else if(s>=7)scoreMap.A++;
+    else if(s>=4)scoreMap.B++;
+    else scoreMap.C++;
+  });
+  var maxSc=Math.max.apply(null,Object.values(scoreMap).concat([1]));
+  var scColors={S:'var(--red)',A:'var(--yellow)',B:'var(--green)',C:'var(--text-3)'};
+  document.getElementById('dash-score').innerHTML=
+    '<div style="display:flex;gap:8px;margin-bottom:14px">'
+    +Object.entries(scoreMap).map(function(e){
+      return'<div style="flex:1;background:var(--bg-3);border-radius:8px;padding:12px;text-align:center">'
+        +'<div style="font-size:22px;font-weight:700;color:'+scColors[e[0]]+'">'+e[1]+'</div>'
+        +'<div style="font-size:11px;color:var(--text-3);margin-top:3px">'+e[0]+'급</div>'
+      +'</div>';
+    }).join('')
+    +'</div>'
+    +Object.entries(scoreMap).map(function(e){return barRow(e[0]+'급',e[1],maxSc,scColors[e[0]]);}).join('');
+
+  // ── 주제별 강사 매칭 현황 ──
+  var topTargets=targets.slice().sort(function(a,b){return Number(a.prio)-Number(b.prio);}).slice(0,8);
+  document.getElementById('dash-matching').innerHTML=topTargets.length
+    ?topTargets.map(function(t){
+      var cnt=instructors.filter(function(i){return i.targetId==t.id;}).length;
+      var goal=3;
+      var pct=Math.min(Math.round(cnt/goal*100),100);
+      var color=cnt>=goal?'var(--green)':cnt>0?'var(--yellow)':'var(--text-3)';
+      return'<div style="margin-bottom:10px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+          +'<span style="font-size:12px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px">'+t.slogan+'</span>'
+          +'<span style="font-size:11.5px;font-weight:600;color:'+color+';flex-shrink:0;margin-left:8px">'+cnt+'/'+goal+'명</span>'
+        +'</div>'
+        +'<div style="background:var(--bg-3);border-radius:3px;height:5px;overflow:hidden">'
+          +'<div style="height:100%;border-radius:3px;background:'+color+';width:'+pct+'%;transition:width .4s"></div>'
+        +'</div>'
+      +'</div>';
+    }).join('')
+    :'<p class="dash-empty">타겟 데이터 없음</p>';
+
+  // ── 블루오션 황금 주제 ──
+  var goldList=targets.filter(function(t){
+    return t.competition&&t.competition.indexOf('낮음')>=0&&t.existing&&t.existing.indexOf('Y')===0;
+  }).sort(function(a,b){return calcScore(b)-calcScore(a);});
   document.getElementById('dash-gold').innerHTML=goldList.length
-    ?goldList.map(function(t){var sl=scoreLabel(calcScore(t));return'<div class="dash-item"><span style="font-weight:700">'+t.slogan+'</span><span class="score-chip '+sl.cls+'">'+sl.txt+'</span></div>';}).join('')
-    :'<p class="dash-empty">해당 조건 없음</p>';
+    ?goldList.map(function(t){
+      var sl=scoreLabel(calcScore(t));
+      var cnt=instructors.filter(function(i){return i.targetId==t.id;}).length;
+      return'<div class="dash-item">'
+        +'<div>'
+          +'<div style="font-weight:600;font-size:13px;margin-bottom:2px">'+t.slogan+'</div>'
+          +'<div style="font-size:11.5px;color:var(--text-3)">'+t.cat+' · '+t.age+' · 강사 '+cnt+'명</div>'
+        +'</div>'
+        +'<span class="score-chip '+sl.cls+'">'+sl.txt+'</span>'
+      +'</div>';
+    }).join('')
+    :'<p class="dash-empty">블루오션+기존지출 조합 없음</p>';
 }
 function sc(l,v,sub){return'<div class="stat-card"><div class="stat-label">'+l+'</div><div class="stat-val">'+v+'</div>'+(sub?'<div class="stat-sub">'+sub+'</div>':'')+'</div>';}
 function barRow(l,n,max,color){return'<div class="bar-row"><span class="bar-label">'+l+'</span><div class="bar-track"><div class="bar-fill" style="width:'+(max?Math.round(n/max*100):0)+'%;background:'+color+'"></div></div><span class="bar-val">'+n+'</span></div>';}
