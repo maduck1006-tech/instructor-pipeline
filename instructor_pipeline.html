@@ -922,6 +922,56 @@ tr:hover .row-edit-btn{opacity:1}
   </div>
 </div>
 
+<!-- 타겟 없을 때 팝업 -->
+<div class="modal-bg" id="no-target-modal">
+  <div class="modal-box" style="width:560px;max-height:88vh;overflow-y:auto">
+    <button class="modal-close" onclick="document.getElementById('no-target-modal').classList.remove('open')">✕</button>
+    <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      🎯 먼저 타겟을 추가하세요
+    </h3>
+    <div class="modal-sub" style="margin-bottom:16px">
+      강사를 추가하려면 연결할 <strong style="color:var(--text-1)">타겟 × 주제</strong>가 필요합니다.<br>
+      강사 정보를 입력하면 AI가 적합한 타겟을 추천해드릴게요.
+    </div>
+
+    <!-- 입력 단계 -->
+    <div id="no-target-input">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">강사 이름 <span style="color:var(--red)">*</span></label>
+          <input id="nt-name" type="text" placeholder="예: 김트레이너" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:9px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">강사 전문 분야 / 바이오 <span style="color:var(--red)">*</span></label>
+          <textarea id="nt-bio" placeholder="강사의 전문 분야, SNS 바이오, 콘텐츠 설명을 붙여넣어 주세요.
+
+예: 헬스 트레이너 | 고도비만 120kg → 75kg 감량 경험자
+다이어트 식단 & 운동 루틴 전문 | 유튜브 구독자 8만" style="width:100%;border:1px solid var(--border-2);border-radius:7px;padding:10px 12px;font-size:13px;font-family:Pretendard,sans-serif;background:var(--bg-1);color:var(--text-1);outline:none;resize:vertical;min-height:100px;line-height:1.7"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
+        <button onclick="goToTargetTab()" style="padding:8px 14px;border:1px solid var(--border-2);border-radius:7px;background:none;color:var(--text-3);font-size:12.5px;cursor:pointer;font-family:Pretendard,sans-serif">타겟 탭으로 이동</button>
+        <div style="display:flex;gap:8px">
+          <button onclick="document.getElementById('no-target-modal').classList.remove('open')" style="padding:8px 16px;border:1px solid var(--border-2);border-radius:7px;background:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">취소</button>
+          <button id="nt-ai-run" style="padding:8px 20px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;font-weight:600;font-family:Pretendard,sans-serif">✦ AI 타겟 추천받기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 추천 결과 단계 -->
+    <div id="no-target-result" style="display:none">
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:12px">
+        이 강사에게 적합한 타겟을 추천했습니다. <strong style="color:var(--text-1)">하나를 선택</strong>하면 타겟을 생성하고 강사와 바로 연결합니다.
+      </div>
+      <div id="nt-target-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
+        <button onclick="rerunNtAi()" style="padding:7px 14px;border:1px solid var(--border-2);border-radius:6px;background:none;color:var(--accent-2);font-size:12.5px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">↺ 다시 추천</button>
+        <button onclick="document.getElementById('no-target-modal').classList.remove('open')" style="padding:7px 16px;border:1px solid var(--border-2);border-radius:6px;background:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:Pretendard,sans-serif;font-weight:500">취소</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 강사 AI 분석 팝업 -->
 <div class="modal-bg" id="inst-ai-modal">
   <div class="modal-box" style="width:560px;max-height:88vh;overflow-y:auto">
@@ -1790,6 +1840,11 @@ function barRow(l,n,max,color){return'<div class="bar-row"><span class="bar-labe
 
 // ── 강사 AI 분석 ──
 function openInstAiPopup(){
+  // 타겟이 없으면 먼저 타겟 생성 제안
+  if(targets.length===0){
+    openNoTargetModal();
+    return;
+  }
   document.getElementById('inst-ai-name').value='';
   document.getElementById('inst-ai-instagram').value='';
   document.getElementById('inst-ai-youtube').value='';
@@ -2370,6 +2425,157 @@ document.getElementById('inst-edit-modal').addEventListener('click',function(e){
 // Enter 키 저장
 document.getElementById('target-edit-modal').addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.tagName!=='TEXTAREA')applyTargetEdit();if(e.key==='Escape')this.classList.remove('open');});
 document.getElementById('inst-edit-modal').addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.tagName!=='TEXTAREA')applyInstEdit();if(e.key==='Escape')this.classList.remove('open');});
+
+// ── 타겟 없을 때 처리 ──
+var ntInstName='';
+
+function openNoTargetModal(){
+  document.getElementById('nt-name').value='';
+  document.getElementById('nt-bio').value='';
+  document.getElementById('no-target-input').style.display='block';
+  document.getElementById('no-target-result').style.display='none';
+  document.getElementById('no-target-modal').classList.add('open');
+  setTimeout(function(){document.getElementById('nt-name').focus();},100);
+}
+
+function goToTargetTab(){
+  document.getElementById('no-target-modal').classList.remove('open');
+  document.querySelectorAll('.nav-item').forEach(function(t){t.classList.remove('active');});
+  document.querySelector('[data-tab="targets"]').classList.add('active');
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('panel-targets').classList.add('active');
+}
+
+function rerunNtAi(){
+  document.getElementById('no-target-input').style.display='block';
+  document.getElementById('no-target-result').style.display='none';
+}
+
+document.getElementById('nt-ai-run').addEventListener('click',function(){
+  var name=document.getElementById('nt-name').value.trim();
+  var bio=document.getElementById('nt-bio').value.trim();
+  if(!name){showToast('강사 이름을 입력해주세요',true,false);return;}
+  if(!bio){showToast('강사 전문 분야를 입력해주세요',true,false);return;}
+  ntInstName=name;
+
+  this.textContent='추천 중...';this.disabled=true;
+  showLoading();
+
+  var prompt='당신은 한국 온라인 교육 콘텐츠 기획 전문가입니다.\n\n'
+    +'⚠️ 반드시 한국어로만 답변하세요.\n\n'
+    +'아래 강사 정보를 바탕으로 이 강사가 가르칠 수 있는 온라인 교육 주제 3개를 추천해주세요.\n\n'
+    +'[강사 정보]\n'
+    +'이름: '+name+'\n'
+    +'소개/전문분야:\n'+bio+'\n\n'
+    +'[출력 형식 - JSON 배열만, 다른 텍스트 없이]\n'
+    +'[\n'
+    +'  {\n'
+    +'    "cat": "대분류 (남성/여성/직장인/시니어/자영업자/학생/부모/반려인 중 하나)",\n'
+    +'    "age": "연령대 (예: 2030, 4060, 전연령)",\n'
+    +'    "pain": "이 강사가 해결해줄 수 있는 핵심 고통 (한국어)",\n'
+    +'    "slogan": "주제 슬로건 (한국어, 예: 직장인 90일 체지방 감량)",\n'
+    +'    "period": "30일 또는 60일 또는 90일 또는 100일 또는 120일",\n'
+    +'    "resultNum": "수치 결과 (예: -10kg, 체지방 -8%)",\n'
+    +'    "resultEmo": "감정 결과 한 문장 (한국어)",\n'
+    +'    "urgency": "매우 높음 또는 높음 또는 중간 또는 낮음",\n'
+    +'    "spend": "매우 높음 또는 높음 또는 중간 또는 낮음",\n'
+    +'    "existing": "Y - 이미 돈 씀 또는 N - 새 시장",\n'
+    +'    "competition": "낮음 (블루오션) 또는 중간 또는 높음 (레드오션)",\n'
+    +'    "prio": "1 또는 2 또는 3",\n'
+    +'    "reason": "이 주제를 추천하는 이유 한 줄 (한국어)"\n'
+    +'  }\n'
+    +']';
+
+  fetch(GROQ_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+    body:JSON.stringify({
+      model:'llama-3.3-70b-versatile',
+      messages:[
+        {role:'system',content:'당신은 한국 온라인 교육 콘텐츠 기획 전문가입니다. 반드시 한국어로만 답변하고 JSON 배열만 출력하세요.'},
+        {role:'user',content:prompt}
+      ],
+      temperature:0.7,max_tokens:1024
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var text=data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
+    if(!text)throw new Error('응답 없음');
+    var match=text.match(/\[[\s\S]*\]/);
+    if(!match)throw new Error('JSON 파싱 실패');
+    var results=JSON.parse(match[0]);
+    hideLoading();
+    document.getElementById('nt-ai-run').textContent='✦ AI 타겟 추천받기';
+    document.getElementById('nt-ai-run').disabled=false;
+    showNtResults(results);
+  })
+  .catch(function(err){
+    hideLoading();
+    document.getElementById('nt-ai-run').textContent='✦ AI 타겟 추천받기';
+    document.getElementById('nt-ai-run').disabled=false;
+    showToast('AI 오류: '+err.message,true,false);
+  });
+});
+
+function showNtResults(results){
+  document.getElementById('no-target-input').style.display='none';
+  document.getElementById('no-target-result').style.display='block';
+
+  var html=results.map(function(t,idx){
+    var sc2=calcScore(t);var sl=scoreLabel(sc2);
+    return'<div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:14px 16px;cursor:pointer;transition:all .15s" '
+      +'onmouseover="this.style.borderColor=\'var(--accent)\';this.style.background=\'rgba(94,106,210,.06)\'" '
+      +'onmouseout="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--bg-1)\'" '
+      +'onclick="selectNtTarget('+idx+')">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">'
+        +'<span class="badge '+catClass(t.cat)+'">'+t.cat+'</span>'
+        +'<span style="font-size:12px;color:var(--text-3)">'+t.age+'</span>'
+        +'<span class="score-chip '+sl.cls+'">'+sl.txt+' '+sc2+'</span>'
+        +'<span class="badge prio-'+t.prio+'">'+t.prio+'순위</span>'
+      +'</div>'
+      +'<div style="font-size:13.5px;font-weight:600;color:var(--text-1);margin-bottom:6px">'+t.slogan+'</div>'
+      +'<div style="font-size:12px;color:var(--text-3);line-height:1.6">'
+        +'😣 '+t.pain+'<br>'
+        +'💡 <span style="color:var(--accent-2)">'+t.reason+'</span>'
+      +'</div>'
+      +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">'
+        +'<button onclick="event.stopPropagation();selectNtTarget('+idx+')" style="padding:6px 16px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-size:12.5px;cursor:pointer;font-weight:600;font-family:Pretendard,sans-serif">이 주제로 선택 →</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+
+  document.getElementById('nt-target-list').innerHTML=html;
+  document.getElementById('nt-target-list').dataset.results=JSON.stringify(results);
+}
+
+function selectNtTarget(idx){
+  var results=JSON.parse(document.getElementById('nt-target-list').dataset.results);
+  var t=results[idx];
+  // 타겟 생성
+  var newT={
+    id:'new_'+Date.now(),
+    cat:t.cat,age:t.age,pain:t.pain,slogan:t.slogan,period:t.period,
+    resultNum:t.resultNum,resultEmo:t.resultEmo,urgency:t.urgency,spend:t.spend,
+    existing:t.existing,competition:t.competition,prio:t.prio
+  };
+  targets.push(newT);
+  saveTarget(newT).then(function(){
+    renderTargets();updateNavCounts();updateTopicFilter();
+    // 타겟 생성 후 강사 추가 팝업 열기
+    document.getElementById('no-target-modal').classList.remove('open');
+    // 강사 추가 팝업 열고 이름 미리 채우기
+    document.getElementById('inst-ai-name').value=ntInstName;
+    document.getElementById('inst-ai-instagram').value='';
+    document.getElementById('inst-ai-youtube').value='';
+    document.getElementById('inst-ai-bio').value='';
+    document.getElementById('inst-ai-desc').value='';
+    document.getElementById('inst-ai-modal').classList.add('open');
+    showToast('✦ "'+t.slogan+'" 타겟 생성됨 — 이제 강사를 추가하세요',false,false);
+  });
+}
+
+document.getElementById('no-target-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 
 // ── 강사 AI 팝업 이벤트 ──
 var GROQ_KEY='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';
