@@ -286,6 +286,29 @@ tr:hover .del-btn{opacity:1}
 .help-shortcut{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12.5px}
 .help-shortcut:last-child{border-bottom:none}
 .help-shortcut .key{background:var(--bg-3);border:1px solid var(--border-2);border-radius:4px;padding:2px 7px;font-size:11px;color:var(--text-2);font-family:monospace}
+
+/* ── 미팅 사이드 패널 ── */
+.meet-side{display:none;position:fixed;right:0;top:0;height:100vh;width:400px;background:var(--bg-2);border-left:1px solid var(--border-2);z-index:6000;overflow-y:auto;box-shadow:-8px 0 32px rgba(0,0,0,.4);flex-direction:column}
+.meet-side.open{display:flex}
+.meet-side-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0}
+.meet-side-name{font-size:15px;font-weight:600;color:var(--text-1)}
+.meet-side-sub{font-size:12px;color:var(--text-3);margin-top:3px}
+.meet-side-close{border:none;background:none;color:var(--text-3);font-size:16px;cursor:pointer;flex-shrink:0}
+.meet-side-close:hover{color:var(--text-1)}
+.meet-side-body{flex:1;overflow-y:auto;padding:16px 20px}
+.meet-side-footer{padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0}
+.meet-card{background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.meet-card-date{font-size:11.5px;color:var(--text-3);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.meet-card-date span{background:var(--bg-3);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:11px}
+.meet-card-row{display:flex;gap:8px;margin-bottom:6px;font-size:12.5px}
+.meet-card-label{color:var(--text-3);width:60px;flex-shrink:0;font-size:11.5px}
+.meet-card-val{color:var(--text-1);flex:1;line-height:1.5}
+.meet-card-next{margin-top:10px;padding:8px 10px;background:rgba(94,106,210,.1);border:1px solid rgba(94,106,210,.2);border-radius:6px;font-size:12.5px;color:var(--accent-2)}
+.inst-row-clickable{cursor:pointer}
+.inst-row-clickable:hover td{background:rgba(94,106,210,.05)!important}
+/* date input custom */
+input[type=date]{color-scheme:dark}
+
 .nav-help{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--text-3);transition:all .12s;border:none;background:none;width:100%;text-align:left;font-family:Pretendard,sans-serif;margin-top:4px}
 .nav-help:hover{background:var(--bg-3);color:var(--text-2)}
 
@@ -553,6 +576,7 @@ tr:hover .row-edit-btn{opacity:1}
               <th style="width:110px">강사명</th>
               <th style="width:148px">담당 주제</th>
               <th style="width:100px">미팅일자</th>
+              <th style="width:80px">시간</th>
               <th style="width:158px">논의 주제</th>
               <th style="width:68px">반응</th>
               <th style="width:158px">조건/요구사항</th>
@@ -620,6 +644,21 @@ tr:hover .row-edit-btn{opacity:1}
   <div class="toast-progress" id="toast-progress"></div>
 </div>
 
+
+<!-- 강사 미팅 사이드 패널 -->
+<div class="meet-side" id="meet-side">
+  <div class="meet-side-header">
+    <div>
+      <div class="meet-side-name" id="meet-side-name">강사명</div>
+      <div class="meet-side-sub" id="meet-side-sub"></div>
+    </div>
+    <button class="meet-side-close" id="meet-side-close">✕</button>
+  </div>
+  <div class="meet-side-body" id="meet-side-body"></div>
+  <div class="meet-side-footer">
+    <button id="meet-side-add" style="width:100%;padding:10px;border:1px solid var(--border-2);border-radius:8px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;font-weight:600;font-family:Pretendard,sans-serif">+ 미팅 추가</button>
+  </div>
+</div>
 
 <!-- 온보딩 튜토리얼 -->
 <div class="onboard-bg" id="onboard-bg">
@@ -1149,7 +1188,7 @@ var FIELD_LABELS={
   story:'스토리 한 줄 요약',diff:'섭외 난이도',contact:'컨택 방법',status:'상태',memo:'메모',
   instagram:'인스타그램',youtube:'유튜브 채널',blog:'블로그',threads:'스레드',
   website:'웹사이트',email:'이메일',phone:'전화번호',kakao:'카카오채널',
-  instId:'강사 선택',date:'미팅 일자',topic:'논의 주제',reaction:'강사 반응',
+  instId:'강사 선택',date:'미팅 일자',time:'미팅 시간',topic:'논의 주제',reaction:'강사 반응',
   conditions:'조건 / 요구사항',next:'다음 액션',mstatus:'상태'
 };
 
@@ -1282,11 +1321,11 @@ function toJS_target(r){return{id:r.id,cat:r.cat,age:r.age||'',pain:r.pain||'',s
 function toJS_inst(r){return{id:r.id,targetId:r.target_id,name:r.name||'',channel:r.channel||'유튜브',followers:r.followers||'',story:r.story||'',sincerity:r.sincerity||3,empathy:r.empathy||3,diff:r.diff||'중',contact:r.contact||'DM',status:r.status||'미컨택',memo:r.memo||'',instagram:r.instagram||'',youtube:r.youtube||'',blog:r.blog||'',threads:r.threads||'',website:r.website||'',email:r.email||'',phone:r.phone||'',kakao:r.kakao||''};}
 function toDB_inst(i){return{target_id:i.targetId||null,name:i.name,channel:i.channel,followers:i.followers,story:i.story,sincerity:i.sincerity,empathy:i.empathy,diff:i.diff,contact:i.contact,status:i.status,memo:i.memo,instagram:i.instagram||null,youtube:i.youtube||null,blog:i.blog||null,threads:i.threads||null,website:i.website||null,email:i.email||null,phone:i.phone||null,kakao:i.kakao||null};}
 function toJS_meet(r){
-  return{id:r.id,instId:r.inst_id,instName:r.inst_name||'',linkedSlogan:r.linked_slogan||'',date:r.meeting_date||'',topic:r.topic||'',reaction:r.reaction||'긍정',conditions:r.conditions||'',next:r.next_action||'',status:r.status||'진행중'};
+  return{id:r.id,instId:r.inst_id,instName:r.inst_name||'',linkedSlogan:r.linked_slogan||'',date:r.meeting_date||'',time:r.meeting_time||'',topic:r.topic||'',reaction:r.reaction||'긍정',conditions:r.conditions||'',next:r.next_action||'',status:r.status||'진행중'};
 }
 function toDB_target(t){return{cat:t.cat,age:t.age,pain:t.pain,slogan:t.slogan,period:t.period,result_num:t.resultNum,result_emo:t.resultEmo,urgency:t.urgency,spend:t.spend,existing:t.existing,competition:t.competition,prio:t.prio};}
 function toDB_inst(i){return{target_id:i.targetId||null,name:i.name,channel:i.channel,followers:i.followers,story:i.story,sincerity:i.sincerity,empathy:i.empathy,diff:i.diff,contact:i.contact,status:i.status,memo:i.memo};}
-function toDB_meet(m){return{inst_id:m.instId||null,inst_name:m.instName,linked_slogan:m.linkedSlogan,meeting_date:m.date||null,topic:m.topic,reaction:m.reaction,conditions:m.conditions,next_action:m.next,status:m.status};}
+function toDB_meet(m){return{inst_id:m.instId||null,inst_name:m.instName,linked_slogan:m.linkedSlogan,meeting_date:m.date||null,meeting_time:m.time||null,topic:m.topic,reaction:m.reaction,conditions:m.conditions,next_action:m.next,status:m.status};}
 
 function setSaveStatus(ok){
   document.getElementById('save-label').textContent=ok?'저장됨':'저장 실패';
@@ -1399,7 +1438,8 @@ function starsHtml(n){var h='';for(var i=1;i<=5;i++)h+='<span class="'+(i<=n?'st
 function dash(v){return(v&&String(v).trim())?v:'<span style="color:#ddd">—</span>';}
 function getOpts(f){
   if(f==='instId')return null;
-  return{cat:CAT_OPTS,period:PERIOD_OPTS,urgency:URG_OPTS,spend:SPEND_OPTS,existing:EXIST_OPTS,competition:COMP_OPTS,prio:PRIO_OPTS,channel:CH_OPTS,diff:DIFF_OPTS,contact:CONT_OPTS,status:IST_OPTS,reaction:REACT_OPTS,mstatus:MST_OPTS}[f]||null;
+  var TIME_OPTS=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'];
+  return{cat:CAT_OPTS,period:PERIOD_OPTS,urgency:URG_OPTS,spend:SPEND_OPTS,existing:EXIST_OPTS,competition:COMP_OPTS,prio:PRIO_OPTS,channel:CH_OPTS,diff:DIFF_OPTS,contact:CONT_OPTS,status:IST_OPTS,reaction:REACT_OPTS,mstatus:MST_OPTS,time:TIME_OPTS}[f]||null;
 }
 function cell(type,id,field,inner,cls,noEdit){
   var c='cell '+(cls||'');if(noEdit)c+=' no-edit';
@@ -1579,7 +1619,7 @@ function renderInstructors(){
       +'<td class="sns-col">'+txtCell(i.email,'i',i.id,'email','cell-small')+'</td>'
       +'<td class="sns-col">'+txtCell(i.phone,'i',i.id,'phone','cell-muted')+'</td>'
       +'<td class="sns-col">'+txtCell(i.kakao,'i',i.id,'kakao','cell-muted')+'</td>'
-      +'<td><div class="action-cell"><button class="row-edit-btn" data-edit-type="i" data-edit-id="'+i.id+'">수정</button><button class="del-btn" data-del-type="i" data-del-id="'+i.id+'">✕</button></div></td>'
+      +'<td><div class="action-cell"><span style="font-size:11px;color:var(--text-3);margin-right:4px;cursor:pointer" title="미팅 로그 보기">📋'+(meetings.filter(function(m){return String(m.instId)===String(i.id);}).length||'')+'</span><button class="row-edit-btn" data-edit-type="i" data-edit-id="'+i.id+'">수정</button><button class="del-btn" data-del-type="i" data-del-id="'+i.id+'">✕</button></div></td>'
     +'</tr>';
   }).join('');
 }
@@ -1618,6 +1658,14 @@ function renderKanban(){
   });
 }
 
+// 날짜 포맷 헬퍼
+function formatDate(d){
+  if(!d)return'';
+  var parts=d.split('-');
+  if(parts.length===3)return parts[0]+'년 '+parseInt(parts[1])+'월 '+parseInt(parts[2])+'일';
+  return d;
+}
+
 function renderMeetings(){
   var q=(document.getElementById('meet-search').value||'').toLowerCase();
   var rows=meetings.filter(function(m){
@@ -1626,15 +1674,17 @@ function renderMeetings(){
     return true;
   });
   var body=document.getElementById('meet-body');
-  if(!rows.length){body.innerHTML='<tr><td colspan="9"><div class="guide-card"><div class="guide-card-title">📅 미팅 로그를 기록해보세요</div><div class="guide-steps"><div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text"><strong>+ 미팅 추가</strong> 클릭</div></div><div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text"><strong>강사명 셀</strong>을 클릭해 강사 DB에서 연결</div></div><div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text">반응, 조건, <strong>다음 액션</strong>을 기록하세요</div></div></div></div></td></tr>';return;}
+  if(!rows.length){body.innerHTML='<tr><td colspan="10"><div class="guide-card"><div class="guide-card-title">📅 미팅 로그를 기록해보세요</div><div class="guide-steps"><div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text"><strong>+ 미팅 추가</strong> 클릭</div></div><div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text"><strong>강사명 셀</strong>을 클릭해 강사 DB에서 연결</div></div><div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text">반응, 조건, <strong>다음 액션</strong>을 기록하세요</div></div></div></div></td></tr>';return;}
   body.innerHTML=rows.map(function(m){
     var mstBadge=m.status==='완료'?'ist-3':m.status==='보류'?'ist-4':'ist-1';
     var instDisp=m.instName?'<span style="font-weight:600;color:var(--text-1)">'+m.instName+'</span>':'<span style="color:var(--text-3);font-size:12px">강사 선택 →</span>';
-    var chipDisp=m.linkedSlogan?'<span class="topic-chip">'+m.linkedSlogan+'</span>':'<span style="color:#ddd;font-size:11px">—</span>';
+    var chipDisp=m.linkedSlogan?'<span class="topic-chip">'+m.linkedSlogan+'</span>':'<span style="color:var(--text-3);font-size:11px">—</span>';
+    var dateDisp=m.date?'<span style="color:var(--text-2)">'+formatDate(m.date)+'</span>':'<span style="color:var(--text-3);font-size:12px">날짜 선택</span>';
     return'<tr>'
       +'<td><div class="cell" data-type="m" data-id="'+m.id+'" data-field="instId" style="gap:6px">'+instDisp+'</div></td>'
       +'<td><div class="cell no-edit" style="cursor:default">'+chipDisp+'</div></td>'
-      +'<td>'+selCell(m.date,'m',m.id,'date','<span class="cell-muted">'+(m.date||'날짜 선택')+'</span>')+'</td>'
+      +'<td>'+selCell(m.date,'m',m.id,'date',dateDisp)+'</td>'
+      +'<td>'+selCell(m.time,'m',m.id,'time','<span class="cell-muted">'+(m.time||'<span style="color:var(--text-3);font-size:12px">시간 선택</span>')+'</span>')+'</td>'
       +'<td>'+txtCell(m.topic,'m',m.id,'topic','cell-small')+'</td>'
       +'<td>'+selCell(m.reaction,'m',m.id,'reaction','<span style="font-weight:700;font-size:12.5px;color:'+reactColor(m.reaction)+'">'+m.reaction+'</span>')+'</td>'
       +'<td>'+txtCell(m.conditions,'m',m.id,'conditions','cell-small')+'</td>'
@@ -1759,7 +1809,7 @@ function renderDashboard(){
       return'<div class="dash-item" style="flex-direction:column;align-items:flex-start;gap:4px;padding:10px 0">'
         +'<div style="display:flex;align-items:center;gap:8px;width:100%;justify-content:space-between">'
           +'<span style="font-weight:600;color:var(--text-1)">'+m.instName+'</span>'
-          +(m.date?'<span style="font-size:11px;color:var(--text-3)">'+m.date+'</span>':'')
+          +(m.date?'<span style="font-size:11px;color:var(--text-3)">'+formatDate(m.date)+(m.time?' '+m.time:'')+'</span>':'')
         +'</div>'
         +'<div style="font-size:12.5px;color:var(--accent-2)">→ '+m.next+'</div>'
         +(m.linkedSlogan?'<div style="font-size:11.5px;color:var(--text-3)">'+m.linkedSlogan+'</div>':'')
@@ -2577,7 +2627,98 @@ function selectNtTarget(idx){
 
 document.getElementById('no-target-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 
-// ── 강사 AI 팝업 이벤트 ──
+// ── 강사 미팅 사이드 패널 ──
+var meetSideInstId=null;
+
+function openMeetSide(instId){
+  var inst=instructors.find(function(x){return String(x.id)===String(instId);});
+  if(!inst)return;
+  meetSideInstId=instId;
+  var t=targets.find(function(x){return x.id==inst.targetId;});
+  document.getElementById('meet-side-name').textContent=inst.name;
+  document.getElementById('meet-side-sub').textContent=(t?t.slogan:'주제 미연결')+' · '+inst.status;
+  renderMeetSide(instId);
+  document.getElementById('meet-side').classList.add('open');
+}
+
+function renderMeetSide(instId){
+  var mList=meetings.filter(function(m){return String(m.instId)===String(instId);});
+  var body=document.getElementById('meet-side-body');
+  if(!mList.length){
+    body.innerHTML='<div style="text-align:center;padding:32px 0;color:var(--text-3);font-size:13px">아직 미팅 기록이 없습니다<br><span style="font-size:12px">아래 버튼으로 추가하세요</span></div>';
+    return;
+  }
+  // 날짜순 정렬 (최신 먼저)
+  mList=mList.slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+  body.innerHTML=mList.map(function(m){
+    var badgeColor=m.reaction==='긍정'?'var(--green)':m.reaction==='부정'?'var(--red)':'var(--text-3)';
+    var stBadge=m.status==='완료'?'ist-3':m.status==='보류'?'ist-4':'ist-1';
+    return'<div class="meet-card">'
+      +'<div class="meet-card-date">'
+        +(m.date?'<span>'+formatDate(m.date)+'</span>':'<span style="color:var(--text-3)">날짜 미정</span>')+(m.time?'<span style="margin-left:4px">'+m.time+'</span>':'')
+        +'<span class="badge '+stBadge+'" style="margin-left:auto">'+m.status+'</span>'
+      +'</div>'
+      +(m.topic?'<div class="meet-card-row"><span class="meet-card-label">논의</span><span class="meet-card-val">'+m.topic+'</span></div>':'')
+      +'<div class="meet-card-row"><span class="meet-card-label">반응</span><span class="meet-card-val" style="color:'+badgeColor+';font-weight:600">'+m.reaction+'</span></div>'
+      +(m.conditions?'<div class="meet-card-row"><span class="meet-card-label">조건</span><span class="meet-card-val">'+m.conditions+'</span></div>':'')
+      +(m.next?'<div class="meet-card-next">→ '+m.next+'</div>':'')
+      +'<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:10px">'
+        +'<button onclick="openMeetEditFromSide(\''+m.id+'\')" style="padding:4px 10px;border:1px solid var(--border-2);border-radius:5px;background:none;color:var(--text-2);font-size:11.5px;cursor:pointer;font-family:Pretendard,sans-serif">수정</button>'
+        +'<button onclick="deleteMeetFromSide(\''+m.id+'\')" style="padding:4px 10px;border:1px solid transparent;border-radius:5px;background:none;color:var(--text-3);font-size:11.5px;cursor:pointer;font-family:Pretendard,sans-serif">삭제</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function openMeetEditFromSide(mid){
+  // 미팅 로그 탭으로 이동해서 해당 행 팝업 열기
+  document.querySelectorAll('.nav-item').forEach(function(t){t.classList.remove('active');});
+  document.querySelector('[data-tab="meetings"]').classList.add('active');
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('panel-meetings').classList.add('active');
+  document.getElementById('meet-side').classList.remove('open');
+  setTimeout(function(){
+    var m=meetings.find(function(x){return String(x.id)===String(mid);});
+    if(m){openPopup(document.querySelector('[data-type="m"][data-id="'+mid+'"]')||document.body,'m',m.id,'topic');}
+  },100);
+}
+
+function deleteMeetFromSide(mid){
+  var m=meetings.find(function(x){return String(x.id)===String(mid);});
+  if(!m)return;
+  pushUndo({action:'delete',type:'m',id:mid,item:Object.assign({},m),table:'meetings'});
+  meetings=meetings.filter(function(x){return String(x.id)!==String(mid);});
+  if(!String(mid).startsWith('new'))deleteFromDB('meetings',mid);
+  renderMeetSide(meetSideInstId);
+  renderMeetings();updateNavCounts();
+  showToast('미팅 삭제됨 — Ctrl+Z로 되돌리기',false,true);
+}
+
+function closeMeetSide(){document.getElementById('meet-side').classList.remove('open');meetSideInstId=null;}
+
+document.getElementById('meet-side-close').addEventListener('click',closeMeetSide);
+
+document.getElementById('meet-side-add').addEventListener('click',function(){
+  if(!meetSideInstId)return;
+  var inst=instructors.find(function(x){return String(x.id)===String(meetSideInstId);});
+  var t=inst?targets.find(function(x){return x.id==inst.targetId;}):null;
+  var nm={id:'new_'+Date.now(),instId:meetSideInstId,instName:inst?inst.name:'',linkedSlogan:t?t.slogan:'',date:'',time:'',topic:'',reaction:'긍정',conditions:'',next:'',status:'진행중'};
+  meetings.push(nm);
+  saveMeeting(nm).then(function(){renderMeetSide(meetSideInstId);renderMeetings();updateNavCounts();});
+  renderMeetSide(meetSideInstId);
+  showToast('미팅 추가됨',false,false);
+});
+
+// ── 강사 행에 미팅 사이드 패널 연결 ──
+document.getElementById('inst-body').addEventListener('click',function(e){
+  if(e.target.closest('.del-btn')||e.target.closest('.row-edit-btn')||e.target.closest('.star-on')||e.target.closest('.star-off')||e.target.closest('[data-field]'))return;
+  var row=e.target.closest('tr');
+  if(!row)return;
+  var delBtn=row.querySelector('.del-btn');
+  if(!delBtn)return;
+  var instId=delBtn.dataset.delId;
+  if(instId)openMeetSide(instId);
+});
 var GROQ_KEY='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';
 var GROQ_URL='https://api.groq.com/openai/v1/chat/completions';
 
@@ -2948,7 +3089,7 @@ document.addEventListener('click',function(e){
   }
   if(e.target.id==='add-meet'){
     var fi=instructors[0];var lk=fi?targets.find(function(t){return t.id==fi.targetId;}):null;
-    var nm={id:'new_'+Date.now(),instId:fi?fi.id:null,instName:fi?fi.name:'',linkedSlogan:lk?lk.slogan:'',date:'',topic:'',reaction:'긍정',conditions:'',next:'',status:'진행중'};
+    var nm={id:'new_'+Date.now(),instId:fi?fi.id:null,instName:fi?fi.name:'',linkedSlogan:lk?lk.slogan:'',date:'',time:'',topic:'',reaction:'긍정',conditions:'',next:'',status:'진행중'};
     meetings.push(nm);renderMeetings();updateNavCounts();
     saveMeeting(nm).then(function(){renderMeetings();updateNavCounts();});return;
   }
